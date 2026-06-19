@@ -416,7 +416,17 @@
           audio.addEventListener('loadedmetadata', onReady);
           audio.addEventListener('error', onAudioError);
         } else if (window.Hls && Hls.isSupported()) {
-          hls = new Hls({ lowLatencyMode: true, enableWorker: true });
+          hls = new Hls({
+            lowLatencyMode: false,
+            enableWorker: true,
+            maxBufferLength: 30,
+            maxMaxBufferLength: 60,
+            liveSyncDuration: 6,
+            liveMaxLatencyDuration: 18,
+            liveDurationInfinity: true,
+            manifestLoadingMaxRetry: 4,
+            levelLoadingTimeOut: 10000,
+          });
           hls.loadSource(HLS_STREAM);
           hls.attachMedia(audio);
           hls.on(Hls.Events.MANIFEST_PARSED, onReady);
