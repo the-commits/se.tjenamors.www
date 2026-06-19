@@ -353,7 +353,7 @@
       </div>
     </div>
 
-    <audio id="radio" preload="none"></audio>
+    <audio id="radio" preload="metadata" autoplay playsinline></audio>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
     <script>
       const API = 'https://radio.tjenamors.se/api/nowplaying/1';
@@ -502,7 +502,7 @@
         audio.src = MP3_STREAM;
         scrub.disabled = true;
         liveWall = Date.now() / 1000;
-        audio.play().catch((e) => console.error(e));
+        attemptPlay();
         playPause.disabled = false;
         startUpgradeProbe();
       }
@@ -556,6 +556,18 @@
         }, 15000);
       }
 
+      function attemptPlay() {
+        audio.play().catch(() => {
+          const handler = () => {
+            audio.play().catch(() => {});
+            document.removeEventListener('click', handler);
+            document.removeEventListener('touchstart', handler);
+          };
+          document.addEventListener('click', handler);
+          document.addEventListener('touchstart', handler);
+        });
+      }
+
       function onReady() {
         playPause.disabled = false;
         scrub.disabled = false;
@@ -566,7 +578,7 @@
           userSeeked = true;
           lastUserPos = p.t;
         }
-        audio.play().catch(() => {});
+        attemptPlay();
       }
 
       function trueEdgeMedia() {
