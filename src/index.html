@@ -537,7 +537,13 @@
       }
 
       function findSongAt(wc) {
-        return timeline.find((s) => wc >= s.played_at && wc < s.played_at + s.duration);
+        const exact = timeline.find((s) => wc >= s.played_at && wc < s.played_at + s.duration);
+        if (exact) return exact;
+        let fallback = null;
+        for (const s of timeline) {
+          if (s.played_at <= wc && (!fallback || s.played_at > fallback.played_at)) fallback = s;
+        }
+        return fallback;
       }
 
       function isAtLive() {
@@ -606,7 +612,7 @@
           setArt(song.art);
           songText.textContent = song.title || song.text;
           artistEl.textContent = song.artist || '';
-          const pos = wc - song.played_at;
+          const pos = Math.min(song.duration, Math.max(0, wc - song.played_at));
           const pct = song.duration ? Math.min(100, (pos / song.duration) * 100) : 0;
           progressFill.style.width = pct + '%';
           timeLabel.textContent = fmt(pos) + ' / ' + fmt(song.duration);
@@ -679,7 +685,7 @@
 
       setInterval(() => {
         if (isAtLive()) liveWall = Date.now() / 1000;
-        if (!isOnline && audioPlaying) render();
+        render();
       }, 1000);
 
       const cityEl = document.querySelector('.city');
@@ -713,7 +719,7 @@
       });
 
       pollNowPlaying();
-      setInterval(pollNowPlaying, 10000);
+      setInterval(pollNowPlaying, 5000);
       setupHls();
       render();
     </script>
