@@ -1,9 +1,17 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "model": "google/gemini-3.5-flash",
+  "instructions": [
+    ".opencode/personal/AGENTS.md"
+  ],
   "mcp": {
     "chrome-devtools": {
       "type": "local",
-      "command": ["npx", "-y", "chrome-devtools-mcp@latest"]
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ]
     }
   }
 }
