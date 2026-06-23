@@ -13,18 +13,22 @@ const VIEWPORTS = [
   { name: 'landscape (667x375)',      w: 667,  h: 375  },
 ];
 
-const TOLERANCE = 0.10; // 10% of viewport for centering tolerance
+const TOLERANCE = 0.10;
 
 let failures = 0;
 let passed = 0;
 
 async function getBoundingBox(page, selector) {
-  return page.evaluate((sel) => {
-    const el = document.querySelector(sel);
-    if (!el) return null;
-    const r = el.getBoundingClientRect();
-    return { top: r.top, left: r.left, width: r.width, height: r.height, bottom: r.bottom };
-  }, selector);
+  try {
+    return await page.evaluate((sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { top: r.top, left: r.left, width: r.width, height: r.height, bottom: r.bottom };
+    }, selector);
+  } catch {
+    return null;
+  }
 }
 
 async function check(label, condition, detail) {
@@ -38,53 +42,57 @@ async function check(label, condition, detail) {
 }
 
 async function runViewport(browser, vp) {
-  const page = await browser.newPage();
-  await page.setViewport({ width: vp.w, height: vp.h });
-  await page.goto(url, { waitUntil: 'networkidle0' });
+  let page;
+  try {
+    page = await browser.newPage();
+    await page.setViewport({ width: vp.w, height: vp.h });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    // Wait for player to render
+    await page.waitForSelector('.player', { timeout: 5000 }).catch(() => {});
+    // Settle
+    await new Promise(r => setTimeout(r, 1200));
 
-  // Allow animation to settle
-  await page.evaluate(() => new Promise(r => setTimeout(r, 1200)));
+    const sun = await getBoundingBox(page, '.sun');
+    const player = await getBoundingBox(page, '.player');
+    const disc = await getBoundingBox(page, '#disc');
 
-  const sun = await getBoundingBox(page, '.sun');
-  const player = await getBoundingBox(page, '.player');
-  const disc = await getBoundingBox(page, '#disc');
+    if (!sun || !player || !disc) {
+      console.error(`  ✗ Missing elements on ${vp.name}`);
+      failures++;
+      return;
+    }
 
-  if (!sun || !player || !disc) {
-    console.error(`  ✗ Missing elements on ${vp.name}`);
+    const sunCx = sun.left + sun.width / 2;
+    const playerCx = player.left + player.width / 2;
+    const vpCx = vp.w / 2;
+
+    console.log(`\n--- ${vp.name} (${vp.w}×${vp.h}) ---`);
+
+    const cxTol = vp.w * TOLERANCE;
+    await check('Sun horizontally centered', Math.abs(sunCx - vpCx) < cxTol, `dx=${(sunCx - vpCx).toFixed(1)}px`);
+    const pDx = (playerCx - vpCx).toFixed(1);
+    await check('Player horizontally centered', Math.abs(playerCx - vpCx) < cxTol, `dx=${pDx}px`);
+
+    await check('Sun near top (top ≤ 30%)', sun.top <= vp.h * 0.3, `sun.top=${sun.top.toFixed(0)}px`);
+    await check('Player starts near top', player.top <= vp.h * 0.4, `player.top=${player.top.toFixed(0)}px`);
+
+    const pBot = player.bottom.toFixed(0);
+    await check('Player fully visible', player.bottom <= vp.h + 1, `bottom=${pBot}px vs height=${vp.h}px`);
+
+    if (vp.w < 640) {
+      await check(`Sun width ≤ 85% viewport (${vp.w}px)`, sun.width <= vp.w * 0.85, `${sun.width.toFixed(0)}px`);
+      await check(`Disc width ≤ 75% viewport (${vp.w}px)`, disc.width <= vp.w * 0.75, `${disc.width.toFixed(0)}px`);
+    }
+
+    await check('Player card width ≤ 97% viewport', player.width <= vp.w * 0.97 + 1, `${player.width.toFixed(0)}px`);
+  } catch (err) {
+    console.error(`  ! Error on ${vp.name}: ${err.message}`);
     failures++;
-    await page.close();
-    return;
+  } finally {
+    if (page) {
+      try { await page.close(); } catch { /* ignore close errors */ }
+    }
   }
-
-  const sunCx = sun.left + sun.width / 2;
-  const playerCx = player.left + player.width / 2;
-  const vpCx = vp.w / 2;
-
-  console.log(`\n--- ${vp.name} (${vp.w}×${vp.h}) ---`);
-
-  // --- Horizontal centering ---
-  const cxTol = vp.w * TOLERANCE;
-  check(`Sun horizontally centered`, Math.abs(sunCx - vpCx) < cxTol, `dx=${(sunCx - vpCx).toFixed(1)}px`);
-  check(`Player horizontally centered`, Math.abs(playerCx - vpCx) < cxTol, `dx=${(playerCx - vpCx).toFixed(1)}px`);
-
-  // --- Near top (not vertically centered) ---
-  check(`Sun near top (top ≤ 30%)`, sun.top <= vp.h * 0.3, `sun.top=${sun.top.toFixed(0)}px`);
-  check(`Player starts near top`, player.top <= vp.h * 0.4, `player.top=${player.top.toFixed(0)}px`);
-
-  // --- Player fully visible ---
-  check(`Player fully visible`, player.bottom <= vp.h + 1, `bottom=${player.bottom.toFixed(0)}px vs height=${vp.h}px`);
-
-  // --- Responsive sizing ---
-  // On narrow viewports (< 640px), sun should be ≤ 85vw and disc ≤ 75vw
-  if (vp.w < 640) {
-    check(`Sun width ≤ 85% viewport (${vp.w}px)`, sun.width <= vp.w * 0.85, `${sun.width.toFixed(0)}px`);
-    check(`Disc width ≤ 75% viewport (${vp.w}px)`, disc.width <= vp.w * 0.75, `${disc.width.toFixed(0)}px`);
-  }
-
-  // Player card width ≤ 97% on all widths
-  check(`Player card width ≤ 97% viewport`, player.width <= vp.w * 0.97 + 1, `${player.width.toFixed(0)}px`);
-
-  await page.close();
 }
 
 async function run() {
@@ -94,7 +102,7 @@ async function run() {
     await runViewport(browser, vp);
   }
 
-  await browser.close();
+  await browser.close().catch(() => {});
   server.close();
 
   console.log(`\n===== Results: ${passed} passed, ${failures} failed =====`);
@@ -102,6 +110,6 @@ async function run() {
 }
 
 run().catch((err) => {
-  console.error('Test error:', err);
+  console.error('Test error:', err.message);
   process.exit(1);
 });
