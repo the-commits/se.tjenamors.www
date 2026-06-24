@@ -1,3 +1,6 @@
+// E2E tests: sun opacity on play/pause, button text toggles.
+// Uses a real silent WAV blob URL so native audio events fire properly.
+
 import puppeteer from 'puppeteer';
 import { serve } from './serve.mjs';
 
@@ -31,14 +34,84 @@ async function getInlineStyle(page, selector, prop) {
   }, [selector, prop]);
 }
 
+// Generate a minimal silent 16-bit mono PCM WAV as a Blob URL inside the page.
+async function injectSilentWav(page) {
+  return page.evaluate(() => {
+    return new Promise((resolve) => {
+      const sampleRate = 8000;
+      const durationSec = 30;
+      const numSamples = Math.floor(sampleRate * durationSec);
+      const dataSize = numSamples * 2; // 16-bit = 2 bytes per sample
+      const buf = new ArrayBuffer(44 + dataSize);
+      const dv = new DataView(buf);
+
+      function writeStr(off, str) {
+        for (let i = 0; i < str.length; i++) dv.setUint8(off + i, str.charCodeAt(i));
+      }
+
+      writeStr(0, 'RIFF');
+      dv.setUint32(4, 36 + dataSize, true);
+      writeStr(8, 'WAVE');
+      writeStr(12, 'fmt ');
+      dv.setUint32(16, 16, true);       // chunk size
+      dv.setUint16(20, 1, true);        // PCM
+      dv.setUint16(22, 1, true);        // mono
+      dv.setUint32(24, sampleRate, true);
+      dv.setUint32(28, sampleRate * 2, true); // byte rate
+      dv.setUint16(32, 2, true);        // block align
+      dv.setUint16(34, 16, true);       // bits per sample
+      writeStr(36, 'data');
+      dv.setUint32(40, dataSize, true);
+      // samples are already zero-initialised (silence for 16-bit PCM)
+
+      const blob = new Blob([buf], { type: 'audio/wav' });
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Replace the audio element's source with the silent WAV
+      const audio = document.querySelector('audio');
+      if (!audio) { resolve(false); return; }
+
+      // Detach HLS if active
+      if (window.hls) {
+        try { window.hls.destroy(); } catch (_) {}
+        window.hls = null;
+      }
+      audio.removeAttribute('src');
+
+      audio.src = blobUrl;
+      audio.load();
+
+      audio.addEventListener('canplaythrough', () => resolve(true), { once: true });
+      audio.addEventListener('error', () => resolve(false), { once: true });
+    });
+  });
+}
+
 async function run() {
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   await page.setViewport({ width: 375, height: 667 });
-  await page.goto(url, { waitUntil: 'networkidle0' });
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+  await page.waitForSelector('.player', { timeout: 5000 }).catch(() => {});
+  await new Promise(r => setTimeout(r, 1200));
 
   // Wait for the player to become visible (rising_city animation + reveal)
   await page.evaluate(() => new Promise(r => setTimeout(r, 1500)));
+
+  console.log('\n--- Inject silent WAV ---');
+
+  const wavLoaded = await injectSilentWav(page);
+  check('Silent WAV loaded', wavLoaded, 'could not load test audio');
+
+  // Wait a bit for the new source to settle
+  await new Promise(r => setTimeout(r, 500));
+
+  // Explicitly play the audio (autoplay policy blocks unmuted play without interaction)
+  await page.evaluate(() => {
+    const a = document.querySelector('audio');
+    if (a) { a.muted = true; a.play().catch(() => {}); }
+  });
+  await new Promise(r => setTimeout(r, 500));
 
   console.log('\n--- Button existence ---');
 
@@ -50,9 +123,9 @@ async function run() {
   const liveBtn = await page.$('#live-btn');
   check('Live button exists', !!liveBtn, '#live-btn not found');
 
-  // Check play button initial text
+  // Check play button initial text (muted autoplay with silent wav → playing → ❚❚)
   const playText = await page.evaluate(() => document.getElementById('play-pause')?.textContent);
-  check('Play button shows ▶ initially', playText === '▶', `got "${playText}"`);
+  check('Play button shows ❚❚ on autoplay', playText === '❚❚', `got "${playText}"`);
 
   // Check live button initial text
   const liveText = await page.evaluate(() => document.getElementById('live-btn')?.textContent);
@@ -64,54 +137,43 @@ async function run() {
   const transition = await getStyle(page, '.city > .sun', 'transition');
   check('Sun has opacity transition', transition?.includes('opacity 2s'), `got "${transition}"`);
 
-  // Check sun starts at opacity 1 (computed style defaults to 1 since no inline style is set)
-  const initialOpacity = await getStyle(page, '.city > .sun', 'opacity');
-  check('Sun starts at opacity 1', parseFloat(initialOpacity) === 1, `got "${initialOpacity}"`);
+  // Check sun starts at opacity 0.1 (autoplay play event faded it)
+  const initialOpacity = await getInlineStyle(page, '.city > .sun', 'opacity');
+  check('Sun is at opacity 0.1 after autoplay', initialOpacity === '0.1', `got "${initialOpacity}"`);
 
-  console.log('\n--- Play event → sun fades to 0.1 ---');
+  console.log('\n--- Pause audio → sun returns to 1 ---');
 
-  // Dispatch a 'play' event on the audio element
+  // Pause the audio element (native pause triggers event listener → opacity 1)
   await page.evaluate(() => {
     const a = document.querySelector('audio');
-    if (a) a.dispatchEvent(new Event('play'));
+    if (a) a.pause();
   });
-
-  // Wait for the 2s CSS transition to complete
-  await page.evaluate(() => new Promise(r => setTimeout(r, 2200)));
-
-  const playingOpacity = await getInlineStyle(page, '.city > .sun', 'opacity');
-  check('Sun opacity is 0.1 after play event', playingOpacity === '0.1', `got "${playingOpacity}"`);
-
-  console.log('\n--- Pause event → sun returns to 1 ---');
-
-  // Dispatch a 'pause' event
-  await page.evaluate(() => {
-    const a = document.querySelector('audio');
-    if (a) a.dispatchEvent(new Event('pause'));
-  });
-
   // Wait for the 2s CSS transition to complete
   await page.evaluate(() => new Promise(r => setTimeout(r, 2200)));
 
   const pausedOpacity = await getInlineStyle(page, '.city > .sun', 'opacity');
-  check('Sun opacity is 1 after pause event', pausedOpacity === '1', `got "${pausedOpacity}"`);
+  check('Sun opacity is 1 after pause', pausedOpacity === '1', `got "${pausedOpacity}"`);
 
-  console.log('\n--- Play button toggles text ---');
-
-  // Simulate clicking play (dispatch play event sets textContent)
-  await page.evaluate(() => {
-    const a = document.querySelector('audio');
-    if (a) a.dispatchEvent(new Event('play'));
-  });
-  const afterPlayText = await page.evaluate(() => document.getElementById('play-pause')?.textContent);
-  check('Play button shows ❚❚ after play', afterPlayText === '❚❚', `got "${afterPlayText}"`);
-
-  await page.evaluate(() => {
-    const a = document.querySelector('audio');
-    if (a) a.dispatchEvent(new Event('pause'));
-  });
+  // Button text should be ▶ after pause
   const afterPauseText = await page.evaluate(() => document.getElementById('play-pause')?.textContent);
   check('Play button shows ▶ after pause', afterPauseText === '▶', `got "${afterPauseText}"`);
+
+  console.log('\n--- Play audio → sun fades to 0.1 ---');
+
+  // Resume playback (native play triggers event listener → opacity 0.1)
+  await page.evaluate(() => {
+    const a = document.querySelector('audio');
+    if (a) a.play().catch(() => {});
+  });
+  // Wait for the 2s CSS transition to complete
+  await page.evaluate(() => new Promise(r => setTimeout(r, 2200)));
+
+  const playingOpacity = await getInlineStyle(page, '.city > .sun', 'opacity');
+  check('Sun opacity is 0.1 after play', playingOpacity === '0.1', `got "${playingOpacity}"`);
+
+  // Button text should be ❚❚ after play
+  const afterPlayText = await page.evaluate(() => document.getElementById('play-pause')?.textContent);
+  check('Play button shows ❚❚ after play', afterPlayText === '❚❚', `got "${afterPlayText}"`);
 
   await browser.close();
   server.close();
