@@ -7,6 +7,7 @@ import {
 import {
   mode, userSeeked, isAtLive, goLive, syncPosition,
   lastUserPos, suppressSeekGuard, setSuppressSeekGuard, scheduleRecover,
+  clearRecover,
 } from './stream.js';
 import { render } from './timeline.js';
 
@@ -57,6 +58,10 @@ audio.addEventListener('pause', () => {
 
 audio.addEventListener('waiting', () => {
   if (!audio.paused && mode === 'hls') scheduleRecover();
+});
+
+audio.addEventListener('playing', () => {
+  clearRecover();
 });
 
 // --- Player positioning ---

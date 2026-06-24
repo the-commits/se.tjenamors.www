@@ -85,6 +85,7 @@ export function onReady() {
   playPause.disabled = false;
   hlsFailCount = 0;
   recoverAttempts = 0;
+  if (recoverTimer) { clearTimeout(recoverTimer); recoverTimer = null; }
   const p = loadPosition();
   if (p && p.t && Date.now() - p.ts < 3600000 && audio.seekable.length &&
       p.t >= audio.seekable.start(0) && p.t <= audio.seekable.end(audio.seekable.length - 1)) {
@@ -113,6 +114,7 @@ export function setupHls() {
     hls = new Hls({
       lowLatencyMode: false,
       enableWorker: true,
+      startLevel: 0,
       maxBufferLength: 120,
       maxMaxBufferLength: 300,
       liveSyncDuration: 90,
@@ -123,7 +125,8 @@ export function setupHls() {
       levelLoadingTimeOut: 60000,
       fragLoadingTimeOut: 60000,
       maxFragLookUpTolerance: 0.25,
-      abrEwmaDefaultEstimate: 200000,
+      maxStarvationDelay: 30,
+      abrEwmaDefaultEstimate: 50000,
       abrBandWidthFactor: 0.7,
       abrBandWidthUpFactor: 0.6,
     });
@@ -198,8 +201,8 @@ export async function probeHls() {
 
 export function startUpgradeProbe() {
   stopUpgradeProbe();
-  upgradeTimer = setInterval(probeHls, 30000);
-  setTimeout(probeHls, 5000);
+  upgradeTimer = setInterval(probeHls, 60000);
+  setTimeout(probeHls, 30000);
 }
 
 export function stopUpgradeProbe() {
@@ -234,4 +237,12 @@ export function scheduleRecover() {
       }
     }
   }, delay);
+}
+
+export function clearRecover() {
+  if (recoverTimer) {
+    clearTimeout(recoverTimer);
+    recoverTimer = null;
+  }
+  recoverAttempts = 0;
 }
