@@ -127,6 +127,8 @@ export function setupHls() {
       maxFragLookUpTolerance: 0.25,
       maxStarvationDelay: 30,
       abrEwmaDefaultEstimate: 50000,
+      abrEwmaFastLive: 15,
+      abrEwmaSlowLive: 45,
       abrBandWidthFactor: 0.7,
       abrBandWidthUpFactor: 0.6,
     });
@@ -137,13 +139,11 @@ export function setupHls() {
       if (data.fatal) onHlsFatal(data);
     });
     audio.addEventListener('stalled', onAudioStalled);
-    audio.addEventListener('waiting', onAudioStalled);
   } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
     audio.src = HLS_STREAM;
     audio.addEventListener('loadedmetadata', onReady);
     audio.addEventListener('error', onAudioError);
     audio.addEventListener('stalled', onAudioStalled);
-    audio.addEventListener('waiting', onAudioStalled);
   } else {
     switchToMp3();
   }
@@ -159,12 +159,8 @@ export function onHlsFatal(data) {
 }
 
 export function onAudioStalled() {
-  if (mode === 'hls' && hls && !audio.paused) {
-    recoverAttempts++;
-    if (recoverAttempts >= 4) {
-      switchToMp3();
-      return;
-    }
+  if (mode === 'hls' && hls && !audio.paused && recoverAttempts >= 6) {
+    switchToMp3();
   }
 }
 
