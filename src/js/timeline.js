@@ -4,7 +4,7 @@
 import {
   nowPlayingSong, timeline, nextUp, isOnline, fetchNow,
 } from './api.js';
-import { mode, isAtLive } from './stream.js';
+import { mode, isAtLive, mediaToWallOffset } from './stream.js';
 import {
   audio, disc, songText, artistEl, progressFill, timeLabel, liveBtn,
 } from './dom.js';
@@ -75,17 +75,14 @@ export function render() {
   }
 
   // Wall clock of the audio the user hears.
-  // Content age = seekableEnd - audio.currentTime (buffer ahead of playhead).
-  // seekableEnd is the latest buffered segment, close to the live edge.
-  // No HLS_LATENCY constant — content age is computed directly from the buffer.
-  const now = Date.now() / 1000;
-  const seekableEnd = audio.seekable.length
-    ? audio.seekable.end(audio.seekable.length - 1)
-    : 0;
-  const contentAge = mode === 'hls' && seekableEnd
-    ? Math.max(0, seekableEnd - audio.currentTime)
-    : 0;
-  const userWallClock = now - contentAge;
+  // mediaToWallOffset is derived from segment filename timestamps (Unix epoch
+  // embedded in URLs like aac_hifi_60_1782420988_49753.ts). When available,
+  // userWallClock = audio.currentTime + offset — exact regardless of buffer
+  // size or HLS latency. Falls back to real-time for MP3 (near-zero latency)
+  // or before the first HLS fragment loads.
+  const userWallClock = mode === 'hls' && mediaToWallOffset
+    ? audio.currentTime + mediaToWallOffset
+    : Date.now() / 1000;
 
   if (nowPlayingSong) {
     // Always search timeline (includes song_history + now_playing + playing_next)
