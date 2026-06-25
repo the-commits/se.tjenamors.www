@@ -11,6 +11,12 @@ export let mode = 'hls';
 export let userSeeked = false;
 export let lastUserPos = 0;
 export let suppressSeekGuard = false;
+export let mediaToWallOffset = 0;
+
+function parseSegmentWallClock(url) {
+  const m = url.match(/_(\d{10,})_\d+\.ts/);
+  return m ? parseInt(m[1], 10) : null;
+}
 
 export function setSuppressSeekGuard(v) {
   suppressSeekGuard = v;
@@ -41,6 +47,7 @@ export function syncPosition() {
 
 export function mediaToWall(mediaTime) {
   if (mode === 'mp3') return Date.now() / 1000;
+  if (mediaToWallOffset) return mediaTime + mediaToWallOffset;
   const edge = trueEdgeMedia();
   if (edge > 0) return liveWall - (edge - mediaTime);
   return Date.now() / 1000;
@@ -48,8 +55,9 @@ export function mediaToWall(mediaTime) {
 
 export function isAtLive() {
   if (mode === 'mp3') return true;
-  const target = syncPosition();
-  return Math.abs(target - audio.currentTime) < 5;
+  const edge = trueEdgeMedia();
+  if (!edge) return false;
+  return Math.abs(edge - audio.currentTime) < 10;
 }
 
 export function goLive() {
@@ -59,8 +67,8 @@ export function goLive() {
     audio.play().catch(() => {});
     return;
   }
-  const live = syncPosition();
-  if (live) audio.currentTime = live;
+  const edge = trueEdgeMedia();
+  if (edge) audio.currentTime = Math.max(0, edge - 3);
   liveWall = Date.now() / 1000;
   audio.play().catch(() => {});
 }
@@ -102,6 +110,8 @@ export function teardownHls() {
     try { hls.destroy(); } catch (_) {}
     hls = null;
   }
+  mediaToWallOffset = 0;
+  window.__mediaToWallOffset = 0;
   audio.removeEventListener('error', onAudioError);
   audio.removeEventListener('stalled', onAudioStalled);
   audio.removeEventListener('waiting', onAudioStalled);
@@ -117,7 +127,7 @@ export function setupHls() {
       enableWorker: true,
       maxBufferLength: 120,
       maxMaxBufferLength: 300,
-      liveSyncDuration: 60,
+      liveSyncDuration: 30,
       liveDurationInfinity: true,
       backBufferLength: 60,
       manifestLoadingMaxRetry: 6,
@@ -136,6 +146,13 @@ export function setupHls() {
     hls.attachMedia(audio);
     // Expose for E2E tests (tests/abr-speeds.mjs reads window.__hls)
     window.__hls = hls;
+    hls.on(Hls.Events.FRAG_PARSED, (_e, data) => {
+      const wc = parseSegmentWallClock(data.frag.url);
+      if (wc !== null && data.frag && data.frag.start !== undefined) {
+        mediaToWallOffset = wc - data.frag.start;
+        window.__mediaToWallOffset = mediaToWallOffset;
+      }
+    });
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       // Start at lowest bitrate level — playlist is not sorted by bandwidth. ABR takes over after first segment.
       const levels = hls.levels;
