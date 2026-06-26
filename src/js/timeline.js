@@ -88,13 +88,19 @@ export function render() {
   }
 
   // Wall clock of the audio the user hears.
+  // When HLS is active, audio.currentTime + mediaToWallOffset gives the user's
+  // exact wall clock position (accurate within ~1 segment duration).
+  // contentAge = seekableEnd - audio.currentTime is the buffer size (~30s with
+  // liveSyncDuration=30), NOT the HLS latency (~5s) — do NOT subtract 30s.
   const seekableEnd = audio.seekable.length
     ? audio.seekable.end(audio.seekable.length - 1)
     : 0;
   const contentAge = mode === 'hls' && seekableEnd
     ? Math.max(0, seekableEnd - audio.currentTime)
     : 0;
-  const userWallClock = mode === 'hls' && seekableEnd && nowPlayingSong
+  const userWallClock = mode === 'hls' && mediaToWallOffset
+    ? audio.currentTime + mediaToWallOffset
+    : mode === 'hls' && seekableEnd && nowPlayingSong
     ? (nowPlayingSong.played_at + nowPlayingSong.elapsed) - contentAge
     : Date.now() / 1000;
 
@@ -111,6 +117,9 @@ export function render() {
       npElapsed: nowPlayingSong?.elapsed,
       npPlayedAt: nowPlayingSong?.played_at,
       offset: mediaToWallOffset.toFixed(1),
+      wallClockAlt: mode === 'hls' && seekableEnd && nowPlayingSong
+        ? Math.round((nowPlayingSong.played_at + nowPlayingSong.elapsed) - contentAge)
+        : null,
       timelineLen: timeline.length,
       isOnline,
       liveClass: liveBtn.classList.contains('live'),
