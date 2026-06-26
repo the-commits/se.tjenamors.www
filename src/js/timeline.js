@@ -3,7 +3,7 @@
 // Debug: set window.__DEBUG = true in console to enable render/song-change logging.
 
 import {
-  nowPlayingSong, timeline, nextUp, isOnline, fetchNow, elapsedCapturedAt,
+  nowPlayingSong, timeline, nextUp, isOnline, fetchNow,
 } from './api.js';
 import { mode, isAtLive, mediaToWallOffset } from './stream.js';
 import {
@@ -24,14 +24,22 @@ export function fmt(s) {
   return m + ':' + String(r).padStart(2, '0');
 }
 
+// Find the song covering a wall clock in the timeline. When multiple songs
+// overlap (e.g., history entry's original duration extends past now_playing's
+// start after a skip), prefers the one with the latest played_at.
 function findSongAt(wc) {
-  const exact = timeline.find((s) => wc >= s.played_at && wc < s.played_at + s.duration);
-  if (exact) return exact;
-  let fallback = null;
+  let best = null;
   for (const s of timeline) {
-    if (s.played_at <= wc && (!fallback || s.played_at > fallback.played_at)) fallback = s;
+    if (wc >= s.played_at && wc < s.played_at + s.duration) {
+      if (!best || s.played_at > best.played_at) best = s;
+    }
   }
-  return fallback;
+  if (best) return best;
+  // Fallback: last song that started before wc (handles gaps).
+  for (const s of timeline) {
+    if (s.played_at <= wc && (!best || s.played_at > best.played_at)) best = s;
+  }
+  return best;
 }
 
 export function setArt(url) {
@@ -127,13 +135,16 @@ export function render() {
   }
 
   if (nowPlayingSong) {
-    // Always search timeline (includes song_history + now_playing + playing_next)
+    // Search timeline for the song at the user's actual wall clock position.
+    // Uses findSongAt which prefers the latest played_at to handle overlaps
+    // from skipped songs. Falls back to nowPlayingSong when no timeline entry
+    // covers the user's wall clock (e.g., song just started on broadcast but
+    // user hasn't caught up yet — min position to 0).
     let song = findSongAt(userWallClock);
     let pos;
     if (song) {
       pos = Math.max(0, userWallClock - song.played_at);
     } else {
-      // timeline doesn't cover this time — fall back to nowPlayingSong
       song = nowPlayingSong;
       pos = Math.max(0, Math.min(song.duration || 0, userWallClock - song.played_at));
     }
@@ -143,7 +154,6 @@ export function render() {
       if (song.id && song.id !== lastSongId) {
         lastSongId = song.id;
       }
-      // Log when the displayed song changes (debug only)
       if (window.__DEBUG && songChanged) {
         console.log('[SONG]', JSON.stringify({
           type: song === nowPlayingSong ? 'np_fallback' :
