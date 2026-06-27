@@ -51,3 +51,18 @@ render();
 startSurfTips();
 initVolume();
 initSeo();
+
+// --- Cookie notice dismiss ---
+
+(function () {
+  const el = document.getElementById('cookie-notice');
+  if (!el) return;
+  if (localStorage.getItem('tj_cookie_notice_dismissed')) {
+    el.classList.add('dismissed');
+  } else {
+    el.addEventListener('click', function () {
+      el.classList.add('dismissed');
+      localStorage.setItem('tj_cookie_notice_dismissed', '1');
+    });
+  }
+})();
