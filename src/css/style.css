@@ -3,3 +3,26 @@
 @import url("./sun.css");
 @import url("./player.css");
 @import url("./surf-tips.css");
+
+/* Cookie notice — bottom of screen, discreet, synthwave-styled */
+#cookie-notice {
+  position: fixed;
+  bottom: 0.5em;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-family: 'Audiowide', sans-serif;
+  font-size: 0.55em;
+  color: rgba(255, 230, 251, 0.5);
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 400px) {
+  #cookie-notice {
+    font-size: 0.45em;
+  }
+}
