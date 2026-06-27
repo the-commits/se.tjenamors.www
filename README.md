@@ -36,5 +36,5 @@ lint + build + E2E. Använd `SKIP_E2E=1 git push` om du inte bryr dig.
 
 ---
 
-**Lyssna på [tjenamors.se](https://tjenamors.se)** - det är ändå
+**Lyssna på [tjenamors.se](https://tjenamors.se)** det är ändå
 nåt att göra.
