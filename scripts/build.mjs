@@ -8,15 +8,11 @@ const src = join(root, '..', 'src');
 const dist = join(root, '..', 'dist');
 
 function stripVendorPrefixes(css) {
-  const patterns = [
-    '-webkit-text-size-adjust',
-    '-moz-column-gap',
-    '-moz-osx-font-smoothing',
-  ];
   return css
-    .split('\n')
-    .filter((line) => !patterns.some((p) => line.includes(p)))
-    .join('\n');
+    .replace(/-webkit-text-size-adjust\s*:\s*[^;]+;?\s*/gi, '')
+    .replace(/-moz-column-gap\s*:\s*[^;]+;?\s*/gi, '')
+    .replace(/-moz-osx-font-smoothing\s*:\s*[^;]+;?\s*/gi, '')
+    .replace(/;;/g, ';');
 }
 
 await rm(dist, { recursive: true, force: true });
