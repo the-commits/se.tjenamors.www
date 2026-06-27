@@ -17,3 +17,5 @@ export const gridContainer = document.querySelector('.grid-container');
 export const surfTipEl = document.getElementById('surf-tip');
 export const surfTipLink = document.getElementById('surf-tip-link');
 export const surfTipText = document.getElementById('surf-tip-text');
+export const volumeSlider = document.getElementById('volume-slider');
+export const volumeIcon = document.getElementById('volume-icon');

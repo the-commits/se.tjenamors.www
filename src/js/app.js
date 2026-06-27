@@ -13,6 +13,7 @@ import { revealPlayer } from './player.js';
 import { gridEl, gridContainer } from './dom.js';
 import { savePosition, savePositionBeforeUnload } from './position.js';
 import { startSurfTips } from './surf-tips.js';
+import { initVolume } from './volume.js';
 
 // --- Grid animation stop ---
 
@@ -46,3 +47,4 @@ setInterval(pollNowPlaying, 2000);
 setupHls();
 render();
 startSurfTips();
+initVolume();
