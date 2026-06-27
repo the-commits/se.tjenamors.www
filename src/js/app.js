@@ -7,6 +7,7 @@
 //   dom.js ← surf-tips.js ← app.js
 //   api.js ← seo.js ← app.js
 //   api.js ← media-session.js ← app.js
+//   dom.js ← cast.js ← app.js
 
 import { pollNowPlaying } from './api.js';
 import { tickLiveWall, setupHls } from './stream.js';
@@ -18,6 +19,7 @@ import { startSurfTips } from './surf-tips.js';
 import { initVolume } from './volume.js';
 import { initSeo } from './seo.js';
 import { initMediaSession } from './media-session.js';
+import { initCast } from './cast.js';
 
 // --- Grid animation stop ---
 
@@ -54,6 +56,7 @@ startSurfTips();
 initVolume();
 initSeo();
 initMediaSession();
+initCast();
 
 // --- Cookie notice dismiss + surf tip reposition ---
 
