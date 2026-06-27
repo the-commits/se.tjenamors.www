@@ -52,17 +52,25 @@ startSurfTips();
 initVolume();
 initSeo();
 
-// --- Cookie notice dismiss ---
+// --- Cookie notice dismiss + surf tip reposition ---
 
 (function () {
-  const el = document.getElementById('cookie-notice');
-  if (!el) return;
+  const notice = document.getElementById('cookie-notice');
+  const tip = document.getElementById('surf-tip');
+  if (!notice) return;
+
+  function lowerSurfTip() {
+    if (tip) tip.style.bottom = '0.8em';
+  }
+
   if (localStorage.getItem('tj_cookie_notice_dismissed')) {
-    el.classList.add('dismissed');
+    notice.classList.add('dismissed');
+    lowerSurfTip();
   } else {
-    el.addEventListener('click', function () {
-      el.classList.add('dismissed');
+    notice.addEventListener('click', function () {
+      notice.classList.add('dismissed');
       localStorage.setItem('tj_cookie_notice_dismissed', '1');
+      lowerSurfTip();
     });
   }
 })();
