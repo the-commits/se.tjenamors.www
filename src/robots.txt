@@ -23,40 +23,21 @@
 # RIGHTS UNDER ARTICLE 4 OF THE EUROPEAN UNION DIRECTIVE 2019/790 ON COPYRIGHT
 # AND RELATED RIGHTS IN THE DIGITAL SINGLE MARKET.
 
-# BEGIN Cloudflare Managed content
-
 User-agent: *
-Content-Signal: search=yes,ai-train=no
 Allow: /
 
+# Block known scrapers and bad bots
 User-agent: Amazonbot
-Disallow: /
-
-User-agent: Applebot-Extended
 Disallow: /
 
 User-agent: Bytespider
 Disallow: /
 
-User-agent: CCBot
-Disallow: /
-
-User-agent: ClaudeBot
-Disallow: /
-
 User-agent: CloudflareBrowserRenderingCrawler
 Disallow: /
 
-User-agent: Google-Extended
-Disallow: /
+# AI crawlers welcome — we want to be found
+# (removed blocks for GPTBot, ClaudeBot, Google-Extended, CCBot, Applebot-Extended, meta-externalagent)
 
-User-agent: GPTBot
-Disallow: /
-
-User-agent: meta-externalagent
-Disallow: /
-
-# END Cloudflare Managed Content
-
-User-agent: *
-Disallow:
+# Sitemap
+Sitemap: https://tjenamors.se/sitemap.xml

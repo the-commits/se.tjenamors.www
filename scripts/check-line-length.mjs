@@ -24,6 +24,7 @@ const exclude = [
   '.opencode/',
   '.husky/',
   'src/build/',
+  'src/index.html',
   'package-lock.json',
 ];
 
