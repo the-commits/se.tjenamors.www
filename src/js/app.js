@@ -6,6 +6,7 @@
 //   api.js  ← (standalone) ─────────────────────────────────── app.js
 //   dom.js ← surf-tips.js ← app.js
 //   api.js ← seo.js ← app.js
+//   api.js ← media-session.js ← app.js
 
 import { pollNowPlaying } from './api.js';
 import { tickLiveWall, setupHls } from './stream.js';
@@ -16,6 +17,7 @@ import { savePosition, savePositionBeforeUnload } from './position.js';
 import { startSurfTips } from './surf-tips.js';
 import { initVolume } from './volume.js';
 import { initSeo } from './seo.js';
+import { initMediaSession } from './media-session.js';
 
 // --- Grid animation stop ---
 
@@ -51,6 +53,7 @@ render();
 startSurfTips();
 initVolume();
 initSeo();
+initMediaSession();
 
 // --- Cookie notice dismiss + surf tip reposition ---
 
@@ -74,3 +77,21 @@ initSeo();
     });
   }
 })();
+
+// --- Service Worker registration (PWA) ---
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {
+    // Registration failure is non-critical — the page works fine without it
+  });
+}
+
+// --- Visibility change — re-sync UI when coming back to tab ---
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    tickLiveWall();
+    render();
+    pollNowPlaying();
+  }
+});
