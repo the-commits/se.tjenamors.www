@@ -1,0 +1,38 @@
+# TjenaMors.se
+
+> Rebelradio från ölstinkande punk och säddrypande könsrock till norsk
+> getblodsdyrkande hobbit metal, varvat med ska. Vi spelar bra skit!
+> Helt utan tracking, garanterat.
+
+TjenaMors.se är en synthwave-stilad webradiostation med satirisk ton.
+Ingen reklam, ingen användarspårning, bara musik. Designad som en PWA
+för mobil och desktop.
+
+## Lyssna
+
+- [Webbplats](https://tjenamors.se): Lyssna live i webbläsaren
+- [HLS-ström](https://radio.tjenamors.se/hls/tjenamors_radio/live.m3u8): Högkvalitativ liveström (HLS)
+- [MP3-ström](https://radio.tjenamors.se/listen/tjenamors_radio/radio.mp3): Alternativ MP3-ström
+
+## API
+
+- [Now Playing](https://radio.tjenamors.se/api/nowplaying/1): Nuvarande låt, artist, cover art och spellista (JSON)
+
+## Teknik
+
+- Vanilla HTML/CSS/JS, inget ramverk
+- HLS.js för adaptiv strömning, MP3 som fallback
+- PWA med service worker för offline-shell
+- Google Cast SDK för Chromecast
+- Media Session API för låsskärmskontroller
+- Web Share API för att dela länk
+- JSON-LD + OG/Twitter meta för SEO
+- Volym sparad i cookie (24h)
+
+## Genre
+
+Punk, Ska, Rock, Metal, Könsrock, Hobbit Metal, Rebellious, Ölstinkande Punk, Getblodsdyrkande Hobbit Metal
+
+## Optional
+
+- [GitHub-repo](https://github.com/the-commits/tjenamors.se): Källkod
