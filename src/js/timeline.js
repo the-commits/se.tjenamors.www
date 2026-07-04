@@ -58,7 +58,7 @@ export function render() {
   const live = isOnline || audio.paused === false;
   if (!live) {
     setArt(null);
-    songText.textContent = 'Ingen sändning';
+    songText.textContent = "Ta're lugnt för fa-an! Vi kommer....";
     artistEl.textContent = '';
     progressFill.style.width = '0%';
     timeLabel.textContent = '';
@@ -72,7 +72,7 @@ export function render() {
       localSongId = nextUp.id;
       localStart = Date.now() / 1000;
     }
-    // After 30s of showing stale nextUp, fall back to "Ingen sändning"
+    // After 30s of showing stale nextUp, fall back to "Ta're lugnt för fa-an! Vi kommer...."
     // instead of showing a song the user almost certainly isn't hearing.
     if (Date.now() / 1000 - localStart < 30) {
       setArt(nextUp.art);
@@ -86,7 +86,7 @@ export function render() {
       liveBtn.classList.toggle('live', isAtLive());
     } else {
       setArt(null);
-      songText.textContent = 'Ingen sändning';
+      songText.textContent = "Ta're lugnt för fa-an! Vi kommer....";
       artistEl.textContent = '';
       progressFill.style.width = '0%';
       timeLabel.textContent = '';
