@@ -30,8 +30,8 @@ function updateMetadata() {
 
   const artwork = nowPlayingSong.art
     ? [
-        { src: nowPlayingSong.art, sizes: '256x256', type: 'image/jpeg' },
-        { src: nowPlayingSong.art, sizes: '512x512', type: 'image/jpeg' },
+        { src: nowPlayingSong.art, sizes: '256x256' },
+        { src: nowPlayingSong.art, sizes: '512x512' },
       ]
     : [
         { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
@@ -47,6 +47,20 @@ function updateMetadata() {
 
   if (window.__DEBUG) console.log('[MEDIA] metadata:', title, '—', artist);
 }
+
+// --- Sync playback state ---
+
+function syncPlaybackState() {
+  if (!('mediaSession' in navigator)) return;
+  try {
+    navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+  } catch (e) {
+    if (window.__DEBUG) console.warn('[MEDIA] playbackState failed', e);
+  }
+}
+
+audio.addEventListener('play', syncPlaybackState);
+audio.addEventListener('pause', syncPlaybackState);
 
 // --- Set up action handlers ---
 
@@ -69,8 +83,8 @@ function setupActions() {
     navigator.mediaSession.setActionHandler('seekforward', null);
     navigator.mediaSession.setActionHandler('nexttrack', null);
     navigator.mediaSession.setActionHandler('previoustrack', null);
-  } catch (_) {
-    // Older browsers throw on null handlers
+  } catch (e) {
+    if (window.__DEBUG) console.warn('[MEDIA] failed to disable action handlers', e);
   }
 }
 
@@ -88,6 +102,9 @@ export function initMediaSession() {
   }
 
   setupActions();
+
+  // Sync initial playback state to current audio state
+  syncPlaybackState();
 
   // Set initial metadata if song data already exists
   updateMetadata();
