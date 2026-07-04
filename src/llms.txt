@@ -36,4 +36,4 @@ Punk, Ska, Rock, Metal, Könsrock, Hobbit Metal, Rebellious, Ölstinkande Punk, 
 
 ## Optional
 
-- [GitHub-repo](https://github.com/the-commits/tjenamors.se): Källkod
+- [GitHub-repo](https://github.com/the-commits/se.tjenamors.www): Källkod
