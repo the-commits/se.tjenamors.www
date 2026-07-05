@@ -79,7 +79,7 @@
 .controls-left {
   display: flex;
   gap: 0.9em;
-  align-items: center;
+  align-items: stretch;
   width: calc(100% * 5 / 8);
 }
 
@@ -87,7 +87,6 @@
   flex: 1;
   text-align: center;
   white-space: nowrap;
-  align-self: center;
 }
 
 .timeline-row {
@@ -300,6 +299,9 @@
 
 #live-btn {
   font-size: 0.75em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #live-btn.live {
