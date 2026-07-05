@@ -35,6 +35,8 @@
   -webkit-backdrop-filter: blur(20px);
   padding: 1.75rem;
   border-radius: 8px !important; /* Slightly rounded for premium glass look */
+  max-height: calc(100vh - 4rem);
+  max-height: calc(100vh - 4rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
 }
 
 #request-modal.visible .request-modal-content {
