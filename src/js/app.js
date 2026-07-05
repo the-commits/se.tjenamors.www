@@ -22,6 +22,7 @@ import { initSeo } from './seo.js';
 import { initMediaSession } from './media-session.js';
 import { initCast } from './cast.js';
 import { initShare } from './share.js';
+import { initRequest } from './request.js';
 
 // --- Grid animation stop ---
 
@@ -60,6 +61,7 @@ initSeo();
 initMediaSession();
 initCast();
 initShare();
+initRequest();
 
 // --- Cookie notice dismiss + surf tip reposition ---
 

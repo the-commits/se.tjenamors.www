@@ -1,0 +1,212 @@
+/* Request Modal & Button Styling — Black Glass Synth-Punk Style */
+
+.request-wrap {
+  width: 66.666667%;
+}
+
+#request-modal {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  padding-top: env(safe-area-inset-top, 1rem);
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+
+#request-modal.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.request-modal-bg {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.request-modal-content {
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 2px solid #00ff66 !important; /* Sleek neon green border */
+  box-shadow: 0 0 30px rgba(0, 255, 102, 0.25) !important; /* Neon green glow */
+  background: rgba(10, 6, 30, 0.85) !important; /* Black glass look */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 1.75rem;
+  border-radius: 8px !important; /* Slightly rounded for premium glass look */
+}
+
+#request-modal.visible .request-modal-content {
+  transform: translateY(0) scale(1);
+}
+
+/* Title: Uppercase, neon green glow */
+#request-modal h2 {
+  text-transform: uppercase;
+  font-family: 'Audiowide', sans-serif;
+  color: #00ff66 !important; /* Neon green */
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
+  font-size: 1.8rem;
+  letter-spacing: 0.05em;
+}
+
+#request-close {
+  color: #36e2f8;
+  transition: all 0.15s ease;
+}
+
+#request-close:hover {
+  color: #00ff66;
+  transform: scale(1.15) rotate(90deg);
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
+}
+
+/* Search Input: Black glass with neon green border */
+#request-search {
+  border: 2px solid rgba(0, 255, 102, 0.4) !important;
+  background: rgba(0, 0, 0, 0.5) !important; /* Dark glass */
+  color: #fff !important;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.05);
+  border-radius: 6px !important;
+  font-family: 'Audiowide', sans-serif;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+}
+
+#request-search:focus {
+  border-color: #00ff66 !important;
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+  outline: none;
+}
+
+/* Scrollbar for the list */
+#request-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+#request-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+#request-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 102, 0.4);
+  border-radius: 4px;
+}
+
+#request-list::-webkit-scrollbar-thumb:hover {
+  background: #00ff66;
+}
+
+/* Request Item: Cohesive neon-green theme with high contrast hover */
+.request-item {
+  display: flex;
+  flex-direction: column;
+  padding: 0.85rem 1.25rem;
+  border-radius: 6px !important;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Odd/Even touch using neon-green shades */
+.request-item:nth-child(odd) {
+  background: rgba(0, 255, 102, 0.02) !important;
+  border: 1px solid rgba(0, 255, 102, 0.15) !important;
+  border-left: 4px solid rgba(0, 255, 102, 0.4) !important;
+}
+
+.request-item:nth-child(even) {
+  background: rgba(0, 255, 102, 0.05) !important;
+  border: 1px solid rgba(0, 255, 102, 0.15) !important;
+  border-left: 4px solid rgba(0, 255, 102, 0.7) !important;
+}
+
+/* Hover: High contrast neon green background with black text */
+.request-item:hover {
+  background: #00ff66 !important;
+  border-color: #00ff66 !important;
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.4) !important;
+  transform: translateX(4px);
+}
+
+.request-item:hover .request-item-title,
+.request-item:hover .request-item-artist {
+  color: #000000 !important;
+  text-shadow: none !important;
+}
+
+.request-item-title {
+  font-family: 'Audiowide', sans-serif;
+  font-weight: 600;
+  color: #ffe6fb;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+}
+
+.request-item-artist {
+  color: #b8d8ff;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Pagination Buttons: Black glass, neon green border */
+#request-prev, #request-next {
+  border-radius: 6px !important;
+  border: 2px solid rgba(0, 255, 102, 0.4);
+  background: rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+#request-prev:not(:disabled):hover, #request-next:not(:disabled):hover {
+  background: rgba(0, 255, 102, 0.1);
+  border-color: #00ff66;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+}
+
+/* Feedback overlay: Black glass, neon green border, glowing text */
+#request-feedback {
+  border-radius: 8px !important;
+  border: 2px solid #00ff66;
+  box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);
+  background: rgba(5, 3, 15, 0.96) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+#request-feedback-text {
+  color: #00ff66 !important;
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
+}
+
+.text-neon-green {
+  color: #00ff66 !important;
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
+}
+
+/* Active glow for the main button */
+.active-glow {
+  animation: punkPulse 2s infinite alternate;
+}
+
+@keyframes punkPulse {
+  0% {
+    box-shadow: 0 0 8px rgba(255, 46, 151, 0.4);
+    border-color: rgba(255, 46, 151, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 16px rgba(0, 255, 102, 0.6);
+    border-color: rgba(0, 255, 102, 0.8);
+  }
+}
+
+#request-feedback:not(.hidden) {
+  display: flex;
+  animation: fadeIn 0.2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
