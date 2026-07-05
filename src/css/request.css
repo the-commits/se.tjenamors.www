@@ -1,7 +1,9 @@
 /* Request Modal & Button Styling — Black Glass Synth-Punk Style */
 
 .request-wrap {
-  width: 66.666667%;
+  width: 22em;
+  max-width: 80vw;
+  margin: 0 auto;
 }
 
 #request-modal {

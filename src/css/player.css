@@ -70,8 +70,11 @@
 .controls {
   display: flex;
   gap: 0.9em;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  width: 22em;
+  max-width: 80vw;
+  margin: 0 auto;
 }
 
 .timeline-row {
