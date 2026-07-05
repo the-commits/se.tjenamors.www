@@ -6,11 +6,14 @@ Synthwave-radiostation. Den funkar. Oftast.
 
 ```bash
 npm install
-node scripts/build.mjs     # src/ → dist/
+node scripts/build.mjs     # src/ → dist/ (Tailwind JIT + minify)
 ```
 
 `dist/` kommer ut om du har tur. Cloudflare Pages deployar från `main`.
 Det är i alla fall planen.
+
+Tailwind CSS JIT kompileras via PostCSS under bygget — använd arbiträr värden
+som `mt-[2.5em]` direkt i HTML. Config i `tailwind.config.mjs`.
 
 ## Testa
 

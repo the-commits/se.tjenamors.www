@@ -1,7 +1,9 @@
 import { cp, rm, mkdir } from 'node:fs/promises';
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative, extname } from 'node:path';
+import postcss from 'postcss';
+import tailwindcss from 'tailwindcss';
 import { minify as minifyHtml } from 'html-minifier-terser';
 import { minify as minifyCss } from 'csso';
 import { minify as minifyJs } from 'terser';
@@ -46,7 +48,7 @@ function stripVendorPrefixes(css) {
 // --- Minifiers ---
 
 async function minifyAllCss() {
-  const excluded = ['fontawesome'];
+  const excluded = ['fontawesome', 'tailwind.css'];
   const files = collect(['.css'], excluded);
   for (const file of files) {
     const original = readFileSync(file, 'utf-8');
@@ -117,6 +119,22 @@ await mkdir(dist, { recursive: true });
 await cp(src, dist, { recursive: true });
 
 console.log('Copied src/ -> dist/');
+
+// Compile Tailwind JIT via PostCSS — overwrites the static base.css.
+console.log('Compiling Tailwind JIT (PostCSS)...');
+const tailwindSrc = join(root, '..', 'src', 'css', 'tailwind.css');
+const baseCssDest = join(dist, 'build', 'assets', 'base.css');
+const tailwindRaw = readFileSync(tailwindSrc, 'utf-8');
+const postcssResult = await postcss([tailwindcss()]).process(tailwindRaw, {
+  from: tailwindSrc,
+  to: baseCssDest,
+});
+mkdirSync(dirname(baseCssDest), { recursive: true });
+writeFileSync(baseCssDest, postcssResult.css);
+if (postcssResult.map) {
+  writeFileSync(baseCssDest + '.map', postcssResult.map.toString());
+}
+console.log('Tailwind JIT compiled to' + relative(dist, baseCssDest));
 
 // Strip bogus vendor-prefixed declarations from CSS files.
 const vendorFiles = [
