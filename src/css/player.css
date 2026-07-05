@@ -81,7 +81,11 @@
   gap: 0.9em;
   align-items: center;
   width: calc(100% * 5 / 8);
-  justify-content: space-between;
+}
+
+.controls-left .btn {
+  flex: 1;
+  text-align: center;
 }
 
 .timeline-row {
