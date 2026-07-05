@@ -214,7 +214,7 @@ async function submitRequest(requestId, song) {
           <div class="text-2xl font-audiowide text-neon-green mb-2">ÖNSKNING SKICKAD!</div>
           <div class="text-lg text-white font-sans mb-4">"${escapeHtml(song.title)}" av ${escapeHtml(song.artist)}</div>
           <div class="text-sm text-pink-400 font-audiowide mb-2">${queueMsg}</div>
-          <div class="text-base text-cyan-200 italic mt-4 max-w-md mx-auto">"${data.message || randomMsg}"</div>
+          <div class="text-base text-cyan-200 italic mt-4 max-w-md mx-auto">"${randomMsg}"</div>
         `;
       } else {
         requestFeedbackText.innerHTML = `
