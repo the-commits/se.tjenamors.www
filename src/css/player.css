@@ -217,7 +217,7 @@
 }
 
 #time {
-  flex: 0 0 calc(100% / 6);
+  flex: 0 0 calc(100% * 3 / 8);
   color: #b8d8ff;
   font-size: 0.7em;
   text-align: right;
