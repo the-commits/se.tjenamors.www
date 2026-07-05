@@ -303,8 +303,13 @@
   box-shadow: 0 0 14px rgba(255, 59, 59, 0.6);
 }
 
-#live-btn.live::before {
+#live-btn::before {
   content: "● ";
+  visibility: hidden;
+}
+
+#live-btn.live::before {
+  visibility: visible;
   animation: livePulse 1.2s ease-in-out infinite;
 }
 
