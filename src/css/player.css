@@ -74,11 +74,20 @@
   align-items: center;
 }
 
-.timeline-wrap {
-  position: relative;
+.timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
   width: 22em;
   max-width: 80vw;
   margin: 0.8em auto 0;
+}
+
+.timeline-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
 }
 
 .volume-control {
@@ -208,9 +217,12 @@
 }
 
 #time {
-  margin-top: 0.5em;
+  flex: 0 0 calc(100% / 6);
   color: #b8d8ff;
   font-size: 0.7em;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .info-shadow {
