@@ -1,16 +1,11 @@
 // Service Worker for TjenaMors.se — PWA install + offline shell.
 // Caches minimal static assets; live stream and API are always network-only.
 
-const CACHE = 'tjena-mors-v1';
+const CACHE = 'tjena-mors-v2';
 
-// Minimal shell to show when offline
+// Minimal shell to show when offline (static assets only — no JS/CSS)
 const SHELL = [
   '/',
-  '/js/app.js',
-  '/css/style.css',
-  '/build/assets/base.css',
-  '/build/assets/fontawesome/css/all.min.css',
-  '/build/assets/fontawesome/webfonts/fa-solid-900.woff2',
   '/site.webmanifest',
   '/favicon-32x32.png',
   '/favicon-16x16.png',
@@ -55,14 +50,17 @@ self.addEventListener('fetch', (event) => {
   // Always go to network for live stream and API
   if (url.hostname === 'radio.tjenamors.se') return;
 
+  // JS and CSS: network-first (always use latest deploy)
   // Navigation requests: network first, fall back to cache
-  if (event.request.mode === 'navigate') {
+  if (event.request.mode === 'navigate' || url.pathname.match(/\.(js|css)$/)) {
     event.respondWith(
       (async () => {
         try {
           const network = await fetch(event.request);
-          const cache = await caches.open(CACHE);
-          cache.put(event.request, network.clone());
+          if (network.ok) {
+            const cache = await caches.open(CACHE);
+            cache.put(event.request, network.clone());
+          }
           return network;
         } catch (_) {
           return caches.match(event.request);
@@ -72,7 +70,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: cache first, fall back to network
+  // Other static assets: cache first, fall back to network
   event.respondWith(
     (async () => {
       const cached = await caches.match(event.request);
