@@ -76,6 +76,12 @@
   margin: 0 auto;
 }
 
+.controls-left {
+  display: flex;
+  gap: 0.9em;
+  align-items: center;
+}
+
 .timeline-row {
   display: flex;
   align-items: center;
