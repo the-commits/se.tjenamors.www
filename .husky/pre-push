@@ -8,5 +8,6 @@ if [ -z "$SKIP_E2E" ]; then
   node tests/surf-tips.mjs && \
   node tests/css-clean.mjs && \
   node tests/song-transitions.mjs && \
-  node tests/wall-clock-sync.mjs
+  node tests/wall-clock-sync.mjs && \
+  node tests/song-request.mjs
 fi
