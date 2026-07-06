@@ -302,6 +302,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 #live-btn.live {
@@ -311,12 +312,16 @@
 }
 
 #live-btn::before {
-  content: "● ";
-  visibility: hidden;
+  content: "●";
+  position: absolute;
+  left: 0.4em;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
 }
 
 #live-btn.live::before {
-  visibility: visible;
+  opacity: 1;
   animation: livePulse 1.2s ease-in-out infinite;
 }
 
