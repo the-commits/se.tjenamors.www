@@ -3,6 +3,31 @@
 import puppeteer from 'puppeteer';
 import { serve } from './serve.mjs';
 
+// Must match src/js/request.js SATIRICAL_MESSAGES — verifies the
+// randomized feedback shown after a successful request is legitimate.
+const SATIRICAL_MESSAGES = [
+  'Din smak är omtvistad men önskan är skickad 🤘',
+  'Okej, vi spelar den. Men om lyssnarna flyr är det ditt fel.',
+  'Mottaget! Våra radioveteraner gråter i fikarummet nu.',
+  'Önskningen är registrerad. Servern gjorde en liten spya men överlevde.',
+  'Bra val! Eller ja, acceptabelt i alla fall.',
+  'Låten är tillagd i kön. Vi har låst in DJ:n tills den spelats.',
+  'Din önskan har mottagits. Vi lovar att inte spela den baklänges.',
+  'Snyggt! Äntlingen någon som inte önskar samma jävla poplåt.',
+  'Mottaget. Vi kör den så fort vi har druckit upp ölen.',
+  'Önskningen är skickad. Vår algoritm gav den 2 av 5 arga gubbar.',
+  'Okej då, den är i kön. Men vi kommer att titta snett på dig.',
+  'Mottaget! Vi rensar öronen med lite punk nu.',
+  'Din önskan är registrerad. Vår katt godkände låtvalet.',
+  'Låten är i kön. Vi ber om ursäkt till grannarna i förväg.',
+  'Mottaget! Vi spelar den högt så att tapeterna lossnar.',
+  'Önskningen mottagen. Vi har lagt den överst... i papperskorgen? Nej, skoja bara.',
+  'Bra skit! Den här låten botar allt utom dålig musiksmak.',
+  'Mottaget. Vi spelar den så fort trummisen har hittat sina pinnar.',
+  'Din önskan är skickad. Vår jurist undersöker om låten är laglig.',
+  'Okej, den är i kön. Men du är skyldig oss en kall öl.',
+];
+
 const { server, url } = await serve();
 let failures = 0;
 let passed = 0;
@@ -154,7 +179,9 @@ async function run() {
   
   await page.waitForSelector('#request-feedback:not(.hidden)', { timeout: 5000 });
   const feedbackText = await page.evaluate(() => document.getElementById('request-feedback').textContent);
-  check('Shows success feedback', feedbackText.includes('Din smak är omtvistad'), `got "${feedbackText}"`);
+  const showsSuccess = feedbackText.includes('ÖNSKNING SKICKAD');
+  const hasSatiricalMessage = SATIRICAL_MESSAGES.some(msg => feedbackText.includes(msg));
+  check('Shows success feedback', showsSuccess && hasSatiricalMessage, `got "${feedbackText}"`);
 
   await browser.close();
   server.close();
