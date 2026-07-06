@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "dev": "node -e \"import('./tests/serve.mjs').then(m => m.serve(9999))\"",
     "radio": "node scripts/azuracast.mjs",
     "lint": "eslint scripts/*.mjs tests/*.mjs tests/helpers/*.mjs src/js/*.js",
     "lint:lines": "node scripts/check-line-length.mjs"

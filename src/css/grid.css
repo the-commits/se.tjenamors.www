@@ -18,19 +18,19 @@
 
 .synth-grid {
   position: relative;
-  -webkit-backdrop-filter: blur(50%);
-  backdrop-filter: blur(50%);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   -webkit-mask-image: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0),
-    hsl(var(--p)) 66%,
-    hsl(var(--p))
+    oklch(var(--p)) 66%,
+    oklch(var(--p))
   );
   mask-image: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0),
-    hsl(var(--p)) 66%,
-    hsl(var(--p))
+    oklch(var(--p)) 66%,
+    oklch(var(--p))
   );
   background:
     linear-gradient(
@@ -70,6 +70,6 @@
   left: 0;
   right: 0;
   height: 100%;
-  background: linear-gradient(rgba(0, 0, 0, 0), hsl(var(--p)));
+  background: linear-gradient(rgba(0, 0, 0, 0), oklch(var(--p)));
   pointer-events: none;
 }
