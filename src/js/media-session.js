@@ -9,6 +9,7 @@ import { audio } from './dom.js';
 
 let lastSongId = null;
 let checkInterval = null;
+let metadataRefreshTimer = null;
 
 // --- Feature flag ---
 
@@ -19,19 +20,14 @@ function isEnabled() {
 
 // --- Update metadata ---
 
-function updateMetadata() {
-  if (!('mediaSession' in navigator)) return;
-  if (!nowPlayingSong) return;
-  if (nowPlayingSong.id === lastSongId) return;
-  lastSongId = nowPlayingSong.id;
+function applyMetadata(song) {
+  const title = song.title || 'TjenaMors Radio';
+  const artist = song.artist || 'Vi spelar bra skit!';
 
-  const title = nowPlayingSong.title || 'TjenaMors Radio';
-  const artist = nowPlayingSong.artist || 'Vi spelar bra skit!';
-
-  const artwork = nowPlayingSong.art
+  const artwork = song.art
     ? [
-        { src: nowPlayingSong.art, sizes: '256x256' },
-        { src: nowPlayingSong.art, sizes: '512x512' },
+        { src: song.art, sizes: '256x256' },
+        { src: song.art, sizes: '512x512' },
       ]
     : [
         { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
@@ -46,6 +42,29 @@ function updateMetadata() {
   });
 
   if (window.__DEBUG) console.log('[MEDIA] metadata:', title, '—', artist);
+}
+
+function scheduleMetadataRefresh(songId) {
+  if (metadataRefreshTimer) clearTimeout(metadataRefreshTimer);
+  metadataRefreshTimer = setTimeout(() => {
+    if (!nowPlayingSong) return;
+    if (nowPlayingSong.id !== songId) return;
+    applyMetadata(nowPlayingSong);
+    metadataRefreshTimer = null;
+  }, 10000);
+}
+
+function updateMetadata() {
+  if (!('mediaSession' in navigator)) return;
+  if (!nowPlayingSong) return;
+  if (nowPlayingSong.id === lastSongId) return;
+  lastSongId = nowPlayingSong.id;
+
+  applyMetadata(nowPlayingSong);
+
+  // Bluetooth AVRCP workaround: re-send metadata after delay
+  // so car head units get a second chance to pick up the artwork URL
+  scheduleMetadataRefresh(nowPlayingSong.id);
 }
 
 // --- Sync playback state ---
