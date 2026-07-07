@@ -51,6 +51,17 @@ export const RETRY_FAILED = [
   "5 försök. 5 misslyckanden. Kanske prova nån annan låt?",
 ];
 
+export const RETRY_WAITING = [
+  "...vi försöker alltså att skicka din låt om 3 minuter igen. Håll ut.",
+  "...vi ger inte upp. Om 3 minuter testar vi igen. Du kan lita på oss. Eller?",
+  "...om 3 minuter jävlar. Då ska den fan in i kön.",
+  "...vi kommer att banka på serverns dörr om 3 minuter tills de släpper in din låt.",
+  "...3 minuters tystnad sen kör vi igen. Fortsätt lyssna så länge.",
+  "...vi försöker igen om 3 minuter. Radioveteranerna sover nog vid det laget.",
+  "...om 3 minuter jagar vi servern med en neon-pink käpp tills den ger med sig.",
+  "...vi lägger in en påminnelse om 3 minuter. Servern hinner inte fly.",
+];
+
 export const ERROR_HEADERS = [
   "DU FÅR VÄNTA DIN TUR",
   "LUGN FÖR FA-AN",

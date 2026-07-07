@@ -15,7 +15,8 @@ import {
   RETRY_SARCASM,
   ALREADY_REQUESTED,
   RETRY_FAILED,
-  ERROR_HEADERS
+  ERROR_HEADERS,
+  RETRY_WAITING
 } from './satirical-messages.js';
 import { showToast, hideToast } from './toast.js';
 
@@ -199,7 +200,10 @@ async function startRetryLoop(requestId, song) {
   requestFeedback.classList.add('hidden');
   requestModal.classList.add('retrying');
 
-  showToast(`[1/1] ${pick(RETRY_SARCASM)}<br><span class="text-sm text-cyan-300">...vi försöker alltså att behandla din önskan inom 3 minuter</span>`, { onCancel: cancelRetry });
+  const waitingMsg = pick(RETRY_WAITING);
+  const toastHtml = `[1/1] ${pick(RETRY_SARCASM)}<br>
+    <span class="text-sm text-cyan-300">${waitingMsg}</span>`;
+  showToast(toastHtml, { onCancel: cancelRetry });
 
   // Wait 3 minutes for the actual retry
   await new Promise(resolve => {
