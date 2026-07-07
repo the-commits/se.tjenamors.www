@@ -24,13 +24,8 @@ import { initCast } from './cast.js';
 import { initShare } from './share.js';
 import { initRequest } from './request.js';
 import { initToast } from './toast.js';
+import { initWelcome } from './welcome.js';
 
-// --- Welcoming browser log ---
-console.log(
-  '%cTjenamors! %c🇸🇪',
-  'background: linear-gradient(135deg, #8A2BE2, #4B0082); color: white; padding: 8px 16px; border-radius: 4px; font-size: 16px; font-weight: bold; font-family: system-ui, sans-serif;',
-  'font-size: 16px;'
-);
 
 // --- Grid animation stop ---
 
@@ -71,6 +66,7 @@ initCast();
 initShare();
 initRequest();
 initToast();
+initWelcome();
 
 // --- Cookie notice dismiss + surf tip reposition ---
 
