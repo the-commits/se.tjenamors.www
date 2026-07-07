@@ -199,8 +199,7 @@ async function startRetryLoop(requestId, song) {
   requestFeedback.classList.add('hidden');
   requestModal.classList.add('retrying');
 
-  const retryMsg = RETRY_SARCASM[Math.floor(Math.random() * RETRY_SARCASM.length)];
-  showToast(`[1/1] ${retryMsg}`, { onCancel: cancelRetry });
+  showToast(`[1/1] ${pick(RETRY_SARCASM)}`, { onCancel: cancelRetry });
 
   // Wait 3 minutes for the actual retry
   await new Promise(resolve => {
@@ -225,6 +224,7 @@ async function startRetryLoop(requestId, song) {
       retryController = null;
       hideToast();
       requestModal.classList.remove('retrying');
+      showToast(pick(SATIRICAL_MESSAGES), { type: 'success', duration: 5000 });
       showRequestSuccess(song);
       return;
     }
