@@ -50,3 +50,13 @@ export const RETRY_FAILED = [
   "Jag antar att din låt inte var ämnad att spelas idag. Förlåt?",
   "5 försök. 5 misslyckanden. Kanske prova nån annan låt?",
 ];
+
+export const ERROR_HEADERS = [
+  "DU FÅR VÄNTA DIN TUR",
+  "LUGN FÖR FA-AN",
+  "DIN LÅT FÅR VÄNTA",
+  "FÖR SENT, KOMPIS",
+  "SÅ JA, DU FÅR VÄNTA",
+  "VÄNTAN FORTSÄTTER",
+  "TUREN ÄR INTE DIN ÄN",
+];

@@ -10,9 +10,16 @@ import {
   requestFeedback,
   requestFeedbackText
 } from './dom.js';
-import { SATIRICAL_MESSAGES, RETRY_SARCASM, ALREADY_REQUESTED, RETRY_FAILED } from './satirical-messages.js';
+import {
+  SATIRICAL_MESSAGES,
+  RETRY_SARCASM,
+  ALREADY_REQUESTED,
+  RETRY_FAILED,
+  ERROR_HEADERS
+} from './satirical-messages.js';
 import { showToast, hideToast, updateToastText } from './toast.js';
 
+const pick = a => a[Math.random() * a.length | 0];
 const SCHEDULE_API = 'https://radio.tjenamors.se/api/station/1/schedule';
 const REQUESTS_API = 'https://radio.tjenamors.se/api/station/1/requests';
 const REQUEST_SUBMIT_API = 'https://radio.tjenamors.se/api/station/1/request/';
@@ -169,7 +176,7 @@ async function startRetryLoop(requestId, song) {
     // Fall back to showing error immediately
     const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
     requestFeedbackText.innerHTML = `
-      <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+      <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
       <div class="text-sm text-cyan-200 font-sans mb-4">${msg}</div>
     `;
     return;
@@ -236,7 +243,7 @@ async function scheduleRetry(requestId, song, attempt, state) {
     const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
     requestFeedback.classList.remove('hidden');
     requestFeedbackText.innerHTML = `
-      <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+      <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
       <div class="text-sm text-cyan-200 font-sans">${msg}</div>
     `;
   }
@@ -303,7 +310,7 @@ async function submitRequest(requestId, song) {
     } catch (parseError) {
       const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
       requestFeedbackText.innerHTML = `
-        <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+        <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
         <div class="text-sm text-cyan-200 font-sans mb-4">${msg}</div>
       `;
       return;
@@ -325,7 +332,7 @@ async function submitRequest(requestId, song) {
       } else {
         const errorText = escapeHtml(msg) || RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
         requestFeedbackText.innerHTML = `
-          <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+          <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
           <div class="text-sm text-cyan-200 font-sans mb-4">${errorText}</div>
         `;
       }
@@ -334,7 +341,7 @@ async function submitRequest(requestId, song) {
     console.error('Submit failed', e);
     const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
     requestFeedbackText.innerHTML = `
-      <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+      <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
       <div class="text-sm text-cyan-200 font-sans">${msg}</div>
     `;
   }
