@@ -4,6 +4,7 @@
 @import url("./player.css");
 @import url("./surf-tips.css");
 @import url("./request.css");
+@import url("./toast.css");
 
 /* Cookie notice — bottom of screen, dismissable, synthwave-styled */
 #cookie-notice {

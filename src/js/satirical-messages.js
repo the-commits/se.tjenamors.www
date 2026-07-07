@@ -23,3 +23,29 @@ export const SATIRICAL_MESSAGES = [
   'Din önskan är skickad. Vår jurist undersöker om låten är laglig.',
   'Okej, den är i kön. Men du är skyldig oss en kall öl.',
 ];
+
+export const RETRY_SARCASM = [
+  'Någon hann före! Vi försöker igen... Karma är en jävla cyklist.',
+  'Nån snodde precis din låt! Vi kämpar på som om det vore melodifestivalen.',
+  'Servern sa "nja, inte just nu". Vi tjatar lite till.',
+  'Tydligen hade någon annan samma briljanta idé. Försöker igen!',
+  'Konkurrensen är stenhård idag. Vi ger inte upp!',
+  'Din låt är populär. Tydligen lite för populär. Försöker igen!',
+  'Nån annan tryckte på knappen 0.3 sekunder före dig. Vi försöker igen!',
+];
+
+export const ALREADY_REQUESTED = [
+  'Du har redan önskat dig något. Din girigbuk!',
+  'En önskan per person. Tack! Du har redan fått din dos.',
+  'Du har redan fått din önskan uppfylld. Var nöjd med det!',
+  'Radioveteranerna säger att en gång räcker. För dig.',
+  'Du har redan önskat! Vill du ha hela spellistan?',
+];
+
+export const RETRY_FAILED = [
+  'Radioveteranerna röstade nej. 5 gånger. Ge upp.',
+  'Servern envisas. Din låt får vänta tills nästa ice age.',
+  'Vi försökte 5 gånger. Radioveteranerna är tydligen svåra att muta.',
+  'Jag antar att din låt inte var ämnad att spelas idag. Förlåt?',
+  '5 försök. 5 misslyckanden. Kanske prova nån annan låt?',
+];

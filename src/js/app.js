@@ -23,6 +23,7 @@ import { initMediaSession } from './media-session.js';
 import { initCast } from './cast.js';
 import { initShare } from './share.js';
 import { initRequest } from './request.js';
+import { initToast } from './toast.js';
 
 // --- Grid animation stop ---
 
@@ -62,6 +63,7 @@ initMediaSession();
 initCast();
 initShare();
 initRequest();
+initToast();
 
 // --- Cookie notice dismiss + surf tip reposition ---
 

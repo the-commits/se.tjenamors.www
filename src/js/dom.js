@@ -31,3 +31,6 @@ export const requestNext = document.getElementById('request-next');
 export const requestPageInfo = document.getElementById('request-page-info');
 export const requestFeedback = document.getElementById('request-feedback');
 export const requestFeedbackText = document.getElementById('request-feedback-text');
+export const requestToast = document.getElementById('request-toast');
+export const requestToastText = document.getElementById('request-toast-text');
+export const requestToastCancel = document.getElementById('request-toast-cancel');

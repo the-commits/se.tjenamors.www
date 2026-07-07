@@ -10,7 +10,8 @@ import {
   requestFeedback,
   requestFeedbackText
 } from './dom.js';
-import { SATIRICAL_MESSAGES } from './satirical-messages.js';
+import { SATIRICAL_MESSAGES, RETRY_SARCASM, ALREADY_REQUESTED, RETRY_FAILED } from './satirical-messages.js';
+import { showToast, hideToast, updateToastText } from './toast.js';
 
 const SCHEDULE_API = 'https://radio.tjenamors.se/api/station/1/schedule';
 const REQUESTS_API = 'https://radio.tjenamors.se/api/station/1/requests';
@@ -163,7 +164,148 @@ function escapeHtml(str) {
   );
 }
 
+// --- Retry state ---
+let retryController = null; // { cancelled: boolean, timer: number|null }
+
+function isRetryEnabled() {
+  if (window.__REQUEST_RETRY_ENABLED === false) return false;
+  return true;
+}
+
+function cancelRetry() {
+  if (retryController) {
+    retryController.cancelled = true;
+    if (retryController.timer) {
+      clearTimeout(retryController.timer);
+      retryController.timer = null;
+    }
+    retryController = null;
+  }
+  hideToast();
+}
+
+async function startRetryLoop(requestId, song) {
+  cancelRetry();
+
+  if (!isRetryEnabled()) {
+    // Fall back to showing error immediately
+    const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
+    requestFeedbackText.innerHTML = `
+      <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+      <div class="text-sm text-cyan-200 font-sans mb-4">${msg}</div>
+    `;
+    return;
+  }
+
+  const state = { cancelled: false, timer: null };
+  retryController = state;
+
+  // Hide feedback overlay — we'll use toast now
+  requestFeedback.classList.add('hidden');
+
+  // Show toast with first retry status
+  const retryMsg = RETRY_SARCASM[Math.floor(Math.random() * RETRY_SARCASM.length)];
+  showToast(`[1/5] ${retryMsg}`, {
+    onCancel: cancelRetry
+  });
+
+  // Start retrying after delay (attempt 2 since first already happened in submitRequest)
+  scheduleRetry(requestId, song, 2, state);
+}
+
+async function scheduleRetry(requestId, song, attempt, state) {
+  if (state.cancelled) return;
+
+  // Wait ~12s between attempts to spread over ~1 min total
+  await new Promise(resolve => {
+    if (state.cancelled) return resolve();
+    state.timer = setTimeout(resolve, 12000);
+  });
+
+  if (state.cancelled) return;
+  if (attempt > 5) {
+    allRetriesFailed(song);
+    return;
+  }
+
+  try {
+    const res = await fetch(`${REQUEST_SUBMIT_API}${requestId}`, { method: 'POST' });
+    let data;
+    try {
+      data = await res.json();
+    } catch (_) {
+      // JSON parse failed — treat as non-terminal, keep retrying
+      updateToastText(`[${attempt}/5] Försöker igen...`);
+      scheduleRetry(requestId, song, attempt + 1, state);
+      return;
+    }
+
+    if (res.ok && data.success) {
+      // Success!
+      retryController = null;
+      hideToast();
+      showRequestSuccess(song);
+      return;
+    }
+
+    // Still failing — schedule next attempt
+    updateToastText(`[${attempt}/5] Försöker igen...`);
+    scheduleRetry(requestId, song, attempt + 1, state);
+  } catch (e) {
+    console.error('Retry network error', e);
+    // Network error — abort retry
+    cancelRetry();
+    requestFeedback.classList.remove('hidden');
+    requestFeedbackText.innerHTML = `
+      <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+      <div class="text-sm text-cyan-200 font-sans">Kunde inte nå servern. Kolla din anslutning.</div>
+    `;
+  }
+}
+
+function allRetriesFailed(song) {
+  retryController = null;
+  const failedMsg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
+
+  // Show in toast then auto-hide
+  showToast(`Misslyckades! ${failedMsg}`, { type: 'error', duration: 5000 });
+
+  // Also show in modal
+  requestFeedback.classList.remove('hidden');
+  requestFeedbackText.innerHTML = `
+    <div class="text-2xl font-audiowide text-pink-400 mb-2">ÖNSKAN MISSILYCKADES</div>
+    <div class="text-sm text-cyan-200 font-sans mb-4">${failedMsg}</div>
+  `;
+
+  setTimeout(() => {
+    requestFeedback.classList.add('hidden');
+    closeModal();
+  }, 4000);
+}
+
+function showRequestSuccess(song) {
+  const queuePos = Math.floor(Math.random() * 4) + 1;
+  const queueMsg = `Det ligger ${queuePos} ${queuePos === 1 ? 'låt' : 'låtar'} före i spelkön.`;
+  const randomMsg = SATIRICAL_MESSAGES[Math.floor(Math.random() * SATIRICAL_MESSAGES.length)];
+
+  requestFeedback.classList.remove('hidden');
+  requestFeedbackText.innerHTML = `
+    <div class="text-2xl font-audiowide text-neon-green mb-2">ÖNSKNING SKICKAD!</div>
+    <div class="text-lg text-white font-sans mb-4">"${escapeHtml(song.title)}" av ${escapeHtml(song.artist)}</div>
+    <div class="text-sm text-pink-400 font-audiowide mb-2">${queueMsg}</div>
+    <div class="text-base text-cyan-200 italic mt-4 max-w-md mx-auto">"${randomMsg}"</div>
+  `;
+
+  setTimeout(() => {
+    requestFeedback.classList.add('hidden');
+    closeModal();
+  }, 4000);
+}
+
 async function submitRequest(requestId, song) {
+  // Cancel any active retry (Story 4: new request cancels old)
+  cancelRetry();
+
   requestFeedbackText.textContent = 'Skickar önskan...';
   requestFeedback.classList.remove('hidden');
   
@@ -185,8 +327,18 @@ async function submitRequest(requestId, song) {
       const res = await fetch(`${REQUEST_SUBMIT_API}${requestId}`, {
         method: 'POST'
       });
-      const data = await res.json();
-      
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseError) {
+        requestFeedbackText.innerHTML = `
+          <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+          <div class="text-sm text-cyan-200 font-sans mb-4">Radioveteranerna röstade nej. Försök igen om en stund.</div>
+        `;
+        return;
+      }
+
       if (res.ok && data.success) {
         requestFeedbackText.innerHTML = `
           <div class="text-2xl font-audiowide text-neon-green mb-2">ÖNSKNING SKICKAD!</div>
@@ -195,26 +347,35 @@ async function submitRequest(requestId, song) {
           <div class="text-base text-cyan-200 italic mt-4 max-w-md mx-auto">"${randomMsg}"</div>
         `;
       } else {
-        requestFeedbackText.innerHTML = `
-          <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
-          <div class="text-sm text-cyan-200 font-sans mb-4">
-            ${data.message || 'Radioveteranerna röstade nej. Försök igen om en stund.'}
-          </div>
-        `;
+        const msg = data.message || '';
+        const retryable = /\b(redan|före|hann|beat|already)\b/i.test(msg);
+
+        if (retryable) {
+          startRetryLoop(requestId, song);
+        } else {
+          const errorText = escapeHtml(msg) || 'Radioveteranerna röstade nej. Försök igen om en stund.';
+          requestFeedbackText.innerHTML = `
+            <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+            <div class="text-sm text-cyan-200 font-sans mb-4">${errorText}</div>
+          `;
+        }
       }
     }
   } catch (e) {
     console.error('Submit failed', e);
     requestFeedbackText.innerHTML = `
-      <div class="text-2xl font-audiowide text-pink-400 mb-2">NÄTVERKSFEL</div>
-      <div class="text-sm text-cyan-200 font-sans">Kunde inte nå servern. Försök igen.</div>
+      <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+      <div class="text-sm text-cyan-200 font-sans">Kunde inte nå servern. Kolla din anslutning.</div>
     `;
   }
-  
-  setTimeout(() => {
-    requestFeedback.classList.add('hidden');
-    closeModal();
-  }, 4000);
+
+  // Only auto-close modal if no retry loop was started
+  if (!retryController) {
+    setTimeout(() => {
+      requestFeedback.classList.add('hidden');
+      closeModal();
+    }, 4000);
+  }
 }
 
 function openModal() {
