@@ -82,7 +82,8 @@ export async function checkSchedule() {
       requestBtn.title = 'Önska en låt (Mock-läge)';
       requestBtn.classList.add('active-glow');
     } else {
-      disableButton('Kunde inte hämta schema');
+      const failMsg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
+      disableButton(failMsg);
     }
   }
 }
@@ -117,7 +118,8 @@ export async function fetchRequestableSongs() {
       currentPage = 1;
       renderList();
     } else {
-      requestList.innerHTML = '<div class="text-center text-pink-400 mt-4">Kunde inte ladda låtlistan.</div>';
+      const failMsg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
+      requestList.innerHTML = `<div class="text-center text-pink-400 mt-4">${failMsg}</div>`;
     }
   }
 }
@@ -255,10 +257,11 @@ async function scheduleRetry(requestId, song, attempt, state) {
     console.error('Retry network error', e);
     // Network error — abort retry
     cancelRetry();
+    const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
     requestFeedback.classList.remove('hidden');
     requestFeedbackText.innerHTML = `
       <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
-      <div class="text-sm text-cyan-200 font-sans">Kunde inte nå servern. Kolla din anslutning.</div>
+      <div class="text-sm text-cyan-200 font-sans">${msg}</div>
     `;
   }
 }
@@ -332,9 +335,10 @@ async function submitRequest(requestId, song) {
       try {
         data = await res.json();
       } catch (parseError) {
+        const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
         requestFeedbackText.innerHTML = `
           <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
-          <div class="text-sm text-cyan-200 font-sans mb-4">Radioveteranerna röstade nej. Försök igen om en stund.</div>
+          <div class="text-sm text-cyan-200 font-sans mb-4">${msg}</div>
         `;
         return;
       }
@@ -353,7 +357,7 @@ async function submitRequest(requestId, song) {
         if (retryable) {
           startRetryLoop(requestId, song);
         } else {
-          const errorText = escapeHtml(msg) || 'Radioveteranerna röstade nej. Försök igen om en stund.';
+          const errorText = escapeHtml(msg) || RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
           requestFeedbackText.innerHTML = `
             <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
             <div class="text-sm text-cyan-200 font-sans mb-4">${errorText}</div>
@@ -363,9 +367,10 @@ async function submitRequest(requestId, song) {
     }
   } catch (e) {
     console.error('Submit failed', e);
+    const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
     requestFeedbackText.innerHTML = `
       <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
-      <div class="text-sm text-cyan-200 font-sans">Kunde inte nå servern. Kolla din anslutning.</div>
+      <div class="text-sm text-cyan-200 font-sans">${msg}</div>
     `;
   }
 
