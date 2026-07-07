@@ -339,11 +339,9 @@ async function submitRequest(requestId, song) {
     }
   } catch (e) {
     console.error('Submit failed', e);
-    const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
-    requestFeedbackText.innerHTML = `
-      <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
-      <div class="text-sm text-cyan-200 font-sans">${msg}</div>
-    `;
+    // Network/CORS error — retry via toast mechanism rather than failing immediately
+    startRetryLoop(requestId, song);
+    return;
   }
 
   // Only auto-close modal if no retry loop was started
