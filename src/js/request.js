@@ -238,14 +238,9 @@ async function scheduleRetry(requestId, song, attempt, state) {
     scheduleRetry(requestId, song, attempt + 1, state);
   } catch (e) {
     console.error('Retry network error', e);
-    // Network error — abort retry
-    cancelRetry();
-    const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
-    requestFeedback.classList.remove('hidden');
-    requestFeedbackText.innerHTML = `
-      <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
-      <div class="text-sm text-cyan-200 font-sans">${msg}</div>
-    `;
+    // Network error — keep retrying, don't abort
+    updateToastText(`[${attempt}/5] Försöker igen...`);
+    scheduleRetry(requestId, song, attempt + 1, state);
   }
 }
 
