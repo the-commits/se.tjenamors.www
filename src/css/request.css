@@ -214,3 +214,14 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* When retrying, fade out list/search/pagination so user can't re-request */
+#request-modal.retrying #request-list,
+#request-modal.retrying #request-search,
+#request-modal.retrying #request-prev,
+#request-modal.retrying #request-next,
+#request-modal.retrying #request-page-info {
+  opacity: 0.2;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}

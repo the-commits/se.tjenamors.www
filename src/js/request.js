@@ -17,7 +17,7 @@ import {
   RETRY_FAILED,
   ERROR_HEADERS
 } from './satirical-messages.js';
-import { showToast, hideToast, updateToastText } from './toast.js';
+import { showToast, hideToast } from './toast.js';
 
 const pick = a => a[Math.random() * a.length | 0];
 const SCHEDULE_API = 'https://radio.tjenamors.se/api/station/1/schedule';
@@ -167,13 +167,13 @@ function cancelRetry() {
     retryController = null;
   }
   hideToast();
+  requestModal.classList.remove('retrying');
 }
 
 async function startRetryLoop(requestId, song) {
   cancelRetry();
 
   if (!isRetryEnabled()) {
-    // Fall back to showing error immediately
     const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
     requestFeedbackText.innerHTML = `
       <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
@@ -185,77 +185,69 @@ async function startRetryLoop(requestId, song) {
   const state = { cancelled: false, timer: null };
   retryController = state;
 
-  // Hide feedback overlay — we'll use toast now
-  requestFeedback.classList.add('hidden');
+  // Tell user we'll retry the request in 3 minutes
+  requestFeedbackText.innerHTML = `
+    <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
+    <div class="text-sm text-cyan-200 font-sans">"${escapeHtml(song.title)}" av ${escapeHtml(song.artist)}</div>
+    <div class="text-base text-pink-400 font-audiowide mt-4">Försöker skicka önskningen om 3 minuter...</div>
+  `;
 
-  // Show toast with first retry status
-  const retryMsg = RETRY_SARCASM[Math.floor(Math.random() * RETRY_SARCASM.length)];
-  showToast(`[1/5] ${retryMsg}`, {
-    onCancel: cancelRetry
-  });
-
-  // Start retrying after delay (attempt 2 since first already happened in submitRequest)
-  scheduleRetry(requestId, song, 2, state);
-}
-
-async function scheduleRetry(requestId, song, attempt, state) {
+  // Let user read confirmation, then fade list and show toast
+  await new Promise(resolve => setTimeout(resolve, 1500));
   if (state.cancelled) return;
 
-  // Wait ~12s between attempts to spread over ~1 min total
+  requestFeedback.classList.add('hidden');
+  requestModal.classList.add('retrying');
+
+  const retryMsg = RETRY_SARCASM[Math.floor(Math.random() * RETRY_SARCASM.length)];
+  showToast(`[1/1] ${retryMsg}`, { onCancel: cancelRetry });
+
+  // Wait 3 minutes for the actual retry
   await new Promise(resolve => {
     if (state.cancelled) return resolve();
-    state.timer = setTimeout(resolve, 12000);
+    state.timer = setTimeout(resolve, 180000);
   });
 
   if (state.cancelled) return;
-  if (attempt > 5) {
-    allRetriesFailed(song);
-    return;
-  }
 
+  // Single retry attempt
   try {
     const res = await fetch(`${REQUEST_SUBMIT_API}${requestId}`, { method: 'POST' });
     let data;
     try {
       data = await res.json();
     } catch (_) {
-      // JSON parse failed — treat as non-terminal, keep retrying
-      updateToastText(`[${attempt}/5] Försöker igen...`);
-      scheduleRetry(requestId, song, attempt + 1, state);
+      failRetry();
       return;
     }
 
     if (res.ok && data.success) {
-      // Success!
       retryController = null;
       hideToast();
+      requestModal.classList.remove('retrying');
       showRequestSuccess(song);
       return;
     }
 
-    // Still failing — schedule next attempt
-    updateToastText(`[${attempt}/5] Försöker igen...`);
-    scheduleRetry(requestId, song, attempt + 1, state);
+    failRetry();
   } catch (e) {
     console.error('Retry network error', e);
-    // Network error — keep retrying, don't abort
-    updateToastText(`[${attempt}/5] Försöker igen...`);
-    scheduleRetry(requestId, song, attempt + 1, state);
+    failRetry();
   }
 }
 
-function allRetriesFailed(song) {
+function failRetry() {
   retryController = null;
-  const failedMsg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
+  hideToast();
+  requestModal.classList.remove('retrying');
 
-  // Show in toast then auto-hide
-  showToast(`Misslyckades! ${failedMsg}`, { type: 'error', duration: 5000 });
+  const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
+  showToast(`Misslyckades! ${msg}`, { type: 'error', duration: 5000 });
 
-  // Also show in modal
   requestFeedback.classList.remove('hidden');
   requestFeedbackText.innerHTML = `
     <div class="text-2xl font-audiowide text-pink-400 mb-2">ÖNSKAN MISSILYCKADES</div>
-    <div class="text-sm text-cyan-200 font-sans mb-4">${failedMsg}</div>
+    <div class="text-sm text-cyan-200 font-sans mb-4">${msg}</div>
   `;
 
   setTimeout(() => {
