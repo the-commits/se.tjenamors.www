@@ -216,6 +216,9 @@
 }
 
 /* When retrying, fade out list/search/pagination so user can't re-request */
+#request-modal.retrying .request-modal-content {
+  padding-top: 3.5em;
+}
 #request-modal.retrying #request-list,
 #request-modal.retrying #request-search,
 #request-modal.retrying #request-prev,
