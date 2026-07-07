@@ -74,17 +74,8 @@ export async function checkSchedule() {
     }
   } catch (e) {
     console.error('Failed to fetch schedule', e);
-    // Fallback for local testing if CORS blocks it
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      console.log('Localhost detected: enabling mock request mode');
-      isRequestEnabled = true;
-      requestBtn.disabled = false;
-      requestBtn.title = 'Önska en låt (Mock-läge)';
-      requestBtn.classList.add('active-glow');
-    } else {
-      const failMsg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
-      disableButton(failMsg);
-    }
+    const failMsg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
+    disableButton(failMsg);
   }
 }
 
@@ -104,23 +95,8 @@ export async function fetchRequestableSongs() {
     renderList();
   } catch (e) {
     console.error('Failed to fetch requestable songs', e);
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      console.log('Localhost detected: loading mock songs');
-      requestableSongs = Array.from({ length: 45 }, (_, i) => ({
-        request_id: `mock-${i}`,
-        song: {
-          id: `mock-song-${i}`,
-          title: `Synthwave Track ${i + 1}`,
-          artist: `Neon Artist ${String.fromCharCode(65 + (i % 6))}`
-        }
-      }));
-      filteredSongs = [...requestableSongs];
-      currentPage = 1;
-      renderList();
-    } else {
-      const failMsg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
-      requestList.innerHTML = `<div class="text-center text-pink-400 mt-4">${failMsg}</div>`;
-    }
+    const failMsg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
+    requestList.innerHTML = `<div class="text-center text-pink-400 mt-4">${failMsg}</div>`;
   }
 }
 
@@ -317,9 +293,23 @@ async function submitRequest(requestId, song) {
   const randomMsg = SATIRICAL_MESSAGES[Math.floor(Math.random() * SATIRICAL_MESSAGES.length)];
 
   try {
-    if (requestId.startsWith('mock-')) {
-      // Simulate network delay for mock requests
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    const res = await fetch(`${REQUEST_SUBMIT_API}${requestId}`, {
+      method: 'POST'
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (parseError) {
+      const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
+      requestFeedbackText.innerHTML = `
+        <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
+        <div class="text-sm text-cyan-200 font-sans mb-4">${msg}</div>
+      `;
+      return;
+    }
+
+    if (res.ok && data.success) {
       requestFeedbackText.innerHTML = `
         <div class="text-2xl font-audiowide text-neon-green mb-2">ÖNSKNING SKICKAD!</div>
         <div class="text-lg text-white font-sans mb-4">"${escapeHtml(song.title)}" av ${escapeHtml(song.artist)}</div>
@@ -327,42 +317,17 @@ async function submitRequest(requestId, song) {
         <div class="text-base text-cyan-200 italic mt-4 max-w-md mx-auto">"${randomMsg}"</div>
       `;
     } else {
-      const res = await fetch(`${REQUEST_SUBMIT_API}${requestId}`, {
-        method: 'POST'
-      });
+      const msg = data.message || '';
+      const retryable = /\b(redan|före|hann|beat|already)\b/i.test(msg);
 
-      let data;
-      try {
-        data = await res.json();
-      } catch (parseError) {
-        const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
+      if (retryable) {
+        startRetryLoop(requestId, song);
+      } else {
+        const errorText = escapeHtml(msg) || RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
         requestFeedbackText.innerHTML = `
           <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
-          <div class="text-sm text-cyan-200 font-sans mb-4">${msg}</div>
+          <div class="text-sm text-cyan-200 font-sans mb-4">${errorText}</div>
         `;
-        return;
-      }
-
-      if (res.ok && data.success) {
-        requestFeedbackText.innerHTML = `
-          <div class="text-2xl font-audiowide text-neon-green mb-2">ÖNSKNING SKICKAD!</div>
-          <div class="text-lg text-white font-sans mb-4">"${escapeHtml(song.title)}" av ${escapeHtml(song.artist)}</div>
-          <div class="text-sm text-pink-400 font-audiowide mb-2">${queueMsg}</div>
-          <div class="text-base text-cyan-200 italic mt-4 max-w-md mx-auto">"${randomMsg}"</div>
-        `;
-      } else {
-        const msg = data.message || '';
-        const retryable = /\b(redan|före|hann|beat|already)\b/i.test(msg);
-
-        if (retryable) {
-          startRetryLoop(requestId, song);
-        } else {
-          const errorText = escapeHtml(msg) || RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
-          requestFeedbackText.innerHTML = `
-            <div class="text-2xl font-audiowide text-pink-400 mb-2">NÅGOT GICK FEL</div>
-            <div class="text-sm text-cyan-200 font-sans mb-4">${errorText}</div>
-          `;
-        }
       }
     }
   } catch (e) {
