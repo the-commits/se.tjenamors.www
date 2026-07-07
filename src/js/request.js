@@ -199,7 +199,7 @@ async function startRetryLoop(requestId, song) {
   requestFeedback.classList.add('hidden');
   requestModal.classList.add('retrying');
 
-  showToast(`[1/1] ${pick(RETRY_SARCASM)}`, { onCancel: cancelRetry });
+  showToast(`[1/1] ${pick(RETRY_SARCASM)}<br><span class="text-sm text-cyan-300">...vi försöker alltså att behandla din önskan inom 3 minuter</span>`, { onCancel: cancelRetry });
 
   // Wait 3 minutes for the actual retry
   await new Promise(resolve => {

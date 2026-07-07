@@ -35,8 +35,8 @@ export function showToast(text, options = {}) {
   // Store cancel handler
   currentCancelHandler = onCancel || null;
 
-  // Set text
-  requestToastText.textContent = text;
+  // Set text (supports HTML for formatting)
+  requestToastText.innerHTML = text;
 
   // Set type class
   requestToast.classList.remove('success', 'error');
