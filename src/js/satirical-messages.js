@@ -57,6 +57,6 @@ export const ERROR_HEADERS = [
   "DIN LÅT FÅR VÄNTA",
   "FÖR SENT, KOMPIS",
   "SÅ JA, DU FÅR VÄNTA",
-  "VÄNTAN FORTSÄTTER",
+  "VÄNTA DIN TUR",
   "TUREN ÄR INTE DIN ÄN",
 ];
