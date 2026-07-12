@@ -51,6 +51,7 @@ function walk(dir) {
       const binaryExts = ['.png', '.jpg', '.jpeg', '.gif', '.ico',
         '.woff', '.woff2', '.ttf', '.eot', '.svg', '.webmanifest'];
       if (binaryExts.includes(ext)) continue;
+      if (ext === '.md') continue;
       files.push(rel);
     }
   }
