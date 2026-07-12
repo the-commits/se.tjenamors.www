@@ -21,7 +21,6 @@ const exclude = [
   'dist/',
   'node_modules/',
   '.git/',
-  '.opencode/',
   '.husky/',
   'src/build/',
   'src/index.html',
@@ -44,6 +43,7 @@ function walk(dir) {
     const full = join(dir, entry);
     const rel = full.replace(root + '/', '');
     if (exclude.some((e) => rel.startsWith(e))) continue;
+    if (rel.includes('/node_modules/')) continue;
     if (statSync(full).isDirectory()) {
       files.push(...walk(full));
     } else if (statSync(full).isFile()) {

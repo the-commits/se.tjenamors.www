@@ -12,7 +12,6 @@ export default [
       'node_modules/',
       'src/build/',
       '.husky/',
-      '.opencode/',
     ],
   },
 ];
