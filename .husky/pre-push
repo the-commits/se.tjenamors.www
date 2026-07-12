@@ -4,6 +4,8 @@ npm run lint && npm run lint:lines
 if [ -z "$SKIP_E2E" ]; then
   node scripts/build.mjs && \
   node tests/mobile-centering.mjs && \
+  node tests/font-size-scaling.mjs && \
+  node tests/high-res-sizing.mjs && \
   node tests/sun-fade.mjs && \
   node tests/surf-tips.mjs && \
   node tests/css-clean.mjs && \
