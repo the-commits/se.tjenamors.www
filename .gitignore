@@ -4,8 +4,5 @@ dist/
 .env
 .env.*
 
-# Personal OpenCode instructions
-.opencode/personal/*
-
 # Temp screenshots and debug output
 tmp/
