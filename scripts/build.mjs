@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSy
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative, extname } from 'node:path';
 import postcss from 'postcss';
+import postcssImport from 'postcss-import';
 import tailwindcss from 'tailwindcss';
 import { minify as minifyHtml } from 'html-minifier-terser';
 import { minify as minifyCss } from 'csso';
@@ -164,6 +165,18 @@ for (const file of vendorFiles) {
     console.log('No vendor prefixes in' + relative(dist, file));
   }
 }
+
+// Bundle the css/style.css @import chain into a single file — kills the
+// sequential-request waterfall (7 round trips) on first page load.
+console.log('Bundling css/style.css @imports...');
+const styleCssPath = join(dist, 'css', 'style.css');
+const styleRaw = readFileSync(styleCssPath, 'utf-8');
+const bundle = await postcss([postcssImport()]).process(styleRaw, {
+  from: styleCssPath,
+  to: styleCssPath,
+});
+writeFileSync(styleCssPath, bundle.css);
+console.log('Bundled @imports into' + relative(dist, styleCssPath));
 
 // Minify CSS (skips fontawesome/ — already minified).
 const cssCount = await minifyAllCss();
