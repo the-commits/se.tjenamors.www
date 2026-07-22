@@ -71,6 +71,8 @@ function showCastNotice() {
 }
 
 async function onCastButtonClick() {
+  // Cast is Chromium-only — never engage outside it (button is hidden too)
+  if (!window.chrome) return;
   if (castContext && castContext.getCurrentSession()) {
     castContext.endCurrentSession(true);
     return;
