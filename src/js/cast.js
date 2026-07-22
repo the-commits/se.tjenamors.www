@@ -56,11 +56,27 @@ function createCastButton() {
   });
 }
 
+// --- Privacy notice ---
+
+// Warn every time casting is activated — unlike the volume cookie notice,
+// this is never remembered: it reappears on each new cast activation.
+// Dismissed by click.
+function showCastNotice() {
+  const notice = document.getElementById('cast-notice');
+  if (!notice || !notice.classList.contains('dismissed')) return;
+  notice.classList.remove('dismissed');
+  notice.addEventListener('click', () => {
+    notice.classList.add('dismissed');
+  }, { once: true });
+}
+
 async function onCastButtonClick() {
   if (castContext && castContext.getCurrentSession()) {
     castContext.endCurrentSession(true);
     return;
   }
+  // Casting contacts Google — warn every single time.
+  showCastNotice();
   // First click loads the Google Cast SDK — this is the only time
   // the page ever contacts gstatic.com.
   const available = await loadCastSDK();

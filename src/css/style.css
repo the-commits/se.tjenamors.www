@@ -7,7 +7,9 @@
 @import url("./toast.css");
 
 /* Cookie notice — bottom of screen, dismissable, synthwave-styled */
-#cookie-notice {
+/* Cast notice shares the pill style, positioned top-center (see below) */
+#cookie-notice,
+#cast-notice {
   position: fixed;
   bottom: 1em;
   left: 50%;
@@ -29,18 +31,21 @@
   border: 1px solid rgba(255, 46, 151, 0.15);
 }
 
-#cookie-notice:hover {
+#cookie-notice:hover,
+#cast-notice:hover {
   color: #ffe6fb;
   border-color: rgba(255, 46, 151, 0.4);
   background: rgba(10, 6, 30, 0.7);
 }
 
-#cookie-notice.dismissed {
+#cookie-notice.dismissed,
+#cast-notice.dismissed {
   opacity: 0;
   pointer-events: none;
 }
 
-#cookie-dismiss {
+#cookie-dismiss,
+#cast-dismiss {
   position: absolute;
   top: -0.35em;
   right: -0.35em;
@@ -61,23 +66,40 @@
   border: 1px solid rgba(255, 59, 59, 0.3);
 }
 
-#cookie-dismiss:hover {
+#cookie-dismiss:hover,
+#cast-dismiss:hover {
   opacity: 1;
   transform: scale(1.2);
   border-color: #ff3b3b;
 }
 
 @media (max-width: 400px) {
-  #cookie-notice {
+  #cookie-notice,
+  #cast-notice {
     font-size: 0.65em;
     padding: 0.4em 0.9em;
     bottom: 0.6em;
   }
-  #cookie-dismiss {
+  #cookie-dismiss,
+  #cast-dismiss {
     top: -0.3em;
     right: -0.3em;
     font-size: 0.85em;
     width: 1.1em;
     height: 1.1em;
+  }
+}
+
+/* Cast privacy notice — top of screen so it never collides with the
+   cookie notice or surf tips at the bottom. Overrides bottom above. */
+#cast-notice {
+  top: 1em;
+  bottom: auto;
+}
+
+@media (max-width: 400px) {
+  #cast-notice {
+    top: 0.6em;
+    bottom: auto;
   }
 }
