@@ -120,6 +120,14 @@ await cp(src, dist, { recursive: true });
 
 console.log('Copied src/ -> dist/');
 
+// Copy hls.js from node_modules to build assets.
+console.log('Copying hls.js...');
+const hlsSrc = join(root, '..', 'node_modules', 'hls.js', 'dist', 'hls.min.js');
+const hlsDest = join(dist, 'build', 'assets', 'hls.min.js');
+mkdirSync(dirname(hlsDest), { recursive: true });
+await cp(hlsSrc, hlsDest);
+console.log('Copied hls.js to' + relative(dist, hlsDest));
+
 // Compile Tailwind JIT via PostCSS — overwrites the static base.css.
 console.log('Compiling Tailwind JIT (PostCSS)...');
 const tailwindSrc = join(root, '..', 'src', 'css', 'tailwind.css');
@@ -160,7 +168,7 @@ for (const file of vendorFiles) {
 // Minify CSS (skips fontawesome/ — already minified).
 const cssCount = await minifyAllCss();
 
-// Minify JS (skips hls.min.js — already minified CDN copy).
+// Minify JS (skips hls.min.js — already minified upstream).
 const jsCount = await minifyAllJs();
 
 // Minify HTML.
