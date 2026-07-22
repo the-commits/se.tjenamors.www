@@ -1,5 +1,3 @@
-import daisyui from 'daisyui';
-
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{html,js}'],
@@ -10,7 +8,6 @@ export default {
       },
       colors: {
         'dark-glass': 'rgba(0, 0, 0, 0.5)',
-        'neon-green': '#00ff66',
       },
     },
     fontFamily: {
@@ -45,16 +42,12 @@ export default {
     },
   },
   plugins: [
-    daisyui,
     function ({ addUtilities }) {
       addUtilities({
         '.text-shadow-neon': {
-          'text-shadow': '0 0 10px rgba(0, 255, 102, 0.6)',
+          'text-shadow': '0 0 10px rgba(255, 255, 255, 0.6)',
         },
       });
     },
   ],
-  daisyui: {
-    themes: ['synthwave'],
-  },
 };

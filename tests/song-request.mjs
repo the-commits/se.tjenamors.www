@@ -4,7 +4,7 @@
 
 import puppeteer from 'puppeteer';
 import { serve } from './serve.mjs';
-import { SATIRICAL_MESSAGES, RETRY_SARCASM, RETRY_FAILED } from '../src/js/satirical-messages.js';
+import { SATIRICAL_MESSAGES, RETRY_SARCASM, RETRY_FAILED, ERROR_HEADERS } from '../src/js/satirical-messages.js';
 
 const { server, url } = await serve();
 let failures = 0;
@@ -141,7 +141,7 @@ async function run() {
   const errorText = await retryPage.evaluate(() =>
     document.getElementById('request-feedback').textContent
   );
-  const showsError = errorText.includes('NÅGOT GICK FEL');
+  const showsError = ERROR_HEADERS.some(h => errorText.includes(h));
   const hasRetryFailedMsg = RETRY_FAILED.some(msg => errorText.includes(msg));
   check('Shows error when retry disabled', showsError, `got "${errorText}"`);
   check('Shows a RETRY_FAILED message when retry disabled', hasRetryFailedMsg, `got "${errorText}"`);
@@ -168,9 +168,9 @@ async function run() {
   const toastText = await toastPage.evaluate(() =>
     document.getElementById('request-toast-text').textContent
   );
-  const hasRetryCounter = /\[\d\/5\]/.test(toastText);
+  const hasRetryCounter = /\[1\/1\]/.test(toastText);
   const hasRetrySarcasm = RETRY_SARCASM.some(msg => toastText.includes(msg));
-  check('Toast shows retry counter [1/5]', hasRetryCounter, `got "${toastText}"`);
+  check('Toast shows retry counter [1/1]', hasRetryCounter, `got "${toastText}"`);
   check('Toast shows retry sarcasm message', hasRetrySarcasm, `got "${toastText}"`);
 
   // Test cancel button
@@ -194,8 +194,8 @@ async function run() {
   const nonRetryText = await nonRetryPage.evaluate(() =>
     document.getElementById('request-feedback').textContent
   );
-  check('Shows "NÅGOT GICK FEL" for non-retryable 500',
-    nonRetryText.includes('NÅGOT GICK FEL'), `got "${nonRetryText}"`);
+  check('Shows an ERROR_HEADERS for non-retryable 500',
+    ERROR_HEADERS.some(h => nonRetryText.includes(h)), `got "${nonRetryText}"`);
   check('Shows server error message',
     nonRetryText.includes('Internal server error'), `got "${nonRetryText}"`);
   await nonRetryPage.close();
@@ -211,8 +211,8 @@ async function run() {
   const nonJsonText = await nonJsonPage.evaluate(() =>
     document.getElementById('request-feedback').textContent
   );
-  check('Shows "NÅGOT GICK FEL" for non-JSON 500', nonJsonText.includes('NÅGOT GICK FEL'), `got "${nonJsonText}"`);
-  check('Shows fallback message', nonJsonText.includes('Radioveteranerna'), `got "${nonJsonText}"`);
+  check('Shows an ERROR_HEADERS for non-JSON 500', ERROR_HEADERS.some(h => nonJsonText.includes(h)), `got "${nonJsonText}"`);
+  check('Shows fallback message', RETRY_FAILED.some(msg => nonJsonText.includes(msg)), `got "${nonJsonText}"`);
   await nonJsonPage.close();
 
   // =====================================================

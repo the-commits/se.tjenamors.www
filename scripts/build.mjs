@@ -120,21 +120,16 @@ await cp(src, dist, { recursive: true });
 
 console.log('Copied src/ -> dist/');
 
-// Compile Tailwind JIT via PostCSS — overwrites the static base.css.
-console.log('Compiling Tailwind JIT (PostCSS)...');
+// Compile Tailwind JIT via Tailwind CLI — overwrites the static base.css.
+console.log('Compiling Tailwind JIT (CLI)...');
 const tailwindSrc = join(root, '..', 'src', 'css', 'tailwind.css');
+const tailwindConfig = join(root, '..', 'tailwind.config.mjs');
 const baseCssDest = join(dist, 'build', 'assets', 'base.css');
-const tailwindRaw = readFileSync(tailwindSrc, 'utf-8');
-const postcssResult = await postcss([tailwindcss()]).process(tailwindRaw, {
-  from: tailwindSrc,
-  to: baseCssDest,
-});
 mkdirSync(dirname(baseCssDest), { recursive: true });
-writeFileSync(baseCssDest, postcssResult.css);
-if (postcssResult.map) {
-  writeFileSync(baseCssDest + '.map', postcssResult.map.toString());
-}
-console.log('Tailwind JIT compiled to' + relative(dist, baseCssDest));
+
+import { execSync } from 'node:child_process';
+execSync(`npx tailwindcss -i "${tailwindSrc}" -o "${baseCssDest}" -c "${tailwindConfig}"`, { stdio: 'inherit' });
+console.log('Tailwind JIT compiled to ' + relative(dist, baseCssDest));
 
 // Strip bogus vendor-prefixed declarations from CSS files.
 const vendorFiles = [

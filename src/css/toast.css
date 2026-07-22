@@ -1,4 +1,4 @@
-/* Toast notification — fixed top-of-page, synthwave-styled */
+/* Toast notification — fixed top-of-page, black and white style */
 #request-toast {
   position: fixed;
   top: 1em;
@@ -7,7 +7,7 @@
   z-index: 9999;
   font-family: 'Audiowide', sans-serif;
   font-size: 0.85em;
-  color: #ffe6fb;
+  color: white;
   text-align: center;
   max-width: calc(100vw - 2em);
   width: auto;
@@ -17,10 +17,10 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
   padding: 0.6em 1.2em;
   border-radius: 8px;
-  background: rgba(10, 6, 30, 0.92);
+  background: rgba(0, 0, 0, 0.92);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(0, 255, 102, 0.4);
-  box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,9 +45,9 @@
 #request-toast-cancel {
   font-family: 'Audiowide', sans-serif;
   font-size: 0.8em;
-  color: #ff2e97;
-  background: rgba(255, 46, 151, 0.1);
-  border: 1px solid rgba(255, 46, 151, 0.4);
+  color: #ccc;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 4px;
   padding: 0.3em 0.8em;
   cursor: pointer;
@@ -56,19 +56,20 @@
 }
 
 #request-toast-cancel:hover {
-  background: rgba(255, 46, 151, 0.25);
-  border-color: #ff2e97;
-  box-shadow: 0 0 8px rgba(255, 46, 151, 0.3);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: white;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  color: white;
 }
 
 #request-toast.success {
-  border-color: #00ff66;
-  box-shadow: 0 0 20px rgba(0, 255, 102, 0.3);
+  border-color: white;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 #request-toast.error {
-  border-color: #ff2e97;
-  box-shadow: 0 0 20px rgba(255, 46, 151, 0.3);
+  border-color: #ff3b3b;
+  box-shadow: 0 0 20px rgba(255, 59, 59, 0.3);
 }
 
 @media (max-width: 400px) {

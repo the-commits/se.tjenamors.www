@@ -104,7 +104,7 @@ export async function fetchRequestableSongs() {
   } catch (e) {
     console.error('Failed to fetch requestable songs', e);
     const failMsg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
-    requestList.innerHTML = `<div class="text-center text-pink-400 mt-4">${failMsg}</div>`;
+    requestList.innerHTML = `<div class="text-center text-white mt-4">${failMsg}</div>`;
   }
 }
 
@@ -116,7 +116,7 @@ function renderList() {
   requestList.innerHTML = '';
   
   if (pageItems.length === 0) {
-    requestList.innerHTML = '<div class="text-center text-cyan-200 mt-4">Inga låtar hittades.</div>';
+    requestList.innerHTML = '<div class="text-center text-gray-300 mt-4">Inga låtar hittades.</div>';
   } else {
     pageItems.forEach(item => {
       const div = document.createElement('div');
@@ -177,8 +177,8 @@ async function startRetryLoop(requestId, song) {
   if (!isRetryEnabled()) {
     const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
     requestFeedbackText.innerHTML = `
-      <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
-      <div class="text-sm text-cyan-200 font-sans mb-4">${msg}</div>
+      <div class="text-2xl font-audiowide text-white mb-2">${pick(ERROR_HEADERS)}</div>
+      <div class="text-sm text-gray-300 font-sans mb-4">${msg}</div>
     `;
     return;
   }
@@ -188,9 +188,9 @@ async function startRetryLoop(requestId, song) {
 
   // Tell user we'll retry the request in 3 minutes
   requestFeedbackText.innerHTML = `
-    <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
-    <div class="text-sm text-cyan-200 font-sans">"${escapeHtml(song.title)}" av ${escapeHtml(song.artist)}</div>
-    <div class="text-base text-pink-400 font-audiowide mt-4">Försöker skicka önskningen om 3 minuter...</div>
+    <div class="text-2xl font-audiowide text-white mb-2">${pick(ERROR_HEADERS)}</div>
+    <div class="text-sm text-gray-300 font-sans">"${escapeHtml(song.title)}" av ${escapeHtml(song.artist)}</div>
+    <div class="text-base text-white font-audiowide mt-4">Försöker skicka önskningen om 3 minuter...</div>
   `;
 
   // Let user read confirmation, then fade list and show toast
@@ -202,7 +202,7 @@ async function startRetryLoop(requestId, song) {
 
   const waitingMsg = pick(RETRY_WAITING);
   const toastHtml = `[1/1] ${pick(RETRY_SARCASM)}<br>
-    <span class="text-sm text-cyan-300">${waitingMsg}</span>`;
+    <span class="text-sm text-gray-400">${waitingMsg}</span>`;
   showToast(toastHtml, { onCancel: cancelRetry });
 
   // Wait 3 minutes for the actual retry
@@ -250,8 +250,8 @@ function failRetry() {
 
   requestFeedback.classList.remove('hidden');
   requestFeedbackText.innerHTML = `
-    <div class="text-2xl font-audiowide text-pink-400 mb-2">ÖNSKAN MISSILYCKADES</div>
-    <div class="text-sm text-cyan-200 font-sans mb-4">${msg}</div>
+    <div class="text-2xl font-audiowide text-white mb-2">ÖNSKAN MISSILYCKADES</div>
+    <div class="text-sm text-gray-300 font-sans mb-4">${msg}</div>
   `;
 
   setTimeout(() => {
@@ -267,10 +267,10 @@ function showRequestSuccess(song) {
 
   requestFeedback.classList.remove('hidden');
   requestFeedbackText.innerHTML = `
-    <div class="text-2xl font-audiowide text-neon-green mb-2">ÖNSKNING SKICKAD!</div>
+    <div class="text-2xl font-audiowide text-white mb-2">ÖNSKNING SKICKAD!</div>
     <div class="text-lg text-white font-sans mb-4">"${escapeHtml(song.title)}" av ${escapeHtml(song.artist)}</div>
-    <div class="text-sm text-pink-400 font-audiowide mb-2">${queueMsg}</div>
-    <div class="text-base text-cyan-200 italic mt-4 max-w-md mx-auto">"${randomMsg}"</div>
+    <div class="text-sm text-white font-audiowide mb-2">${queueMsg}</div>
+    <div class="text-base text-gray-300 italic mt-4 max-w-md mx-auto">"${randomMsg}"</div>
   `;
 
   setTimeout(() => {
@@ -301,18 +301,18 @@ async function submitRequest(requestId, song) {
     } catch (parseError) {
       const msg = RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
       requestFeedbackText.innerHTML = `
-        <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
-        <div class="text-sm text-cyan-200 font-sans mb-4">${msg}</div>
+        <div class="text-2xl font-audiowide text-white mb-2">${pick(ERROR_HEADERS)}</div>
+        <div class="text-sm text-gray-300 font-sans mb-4">${msg}</div>
       `;
       return;
     }
 
     if (res.ok && data.success) {
       requestFeedbackText.innerHTML = `
-        <div class="text-2xl font-audiowide text-neon-green mb-2">ÖNSKNING SKICKAD!</div>
+        <div class="text-2xl font-audiowide text-white mb-2">ÖNSKNING SKICKAD!</div>
         <div class="text-lg text-white font-sans mb-4">"${escapeHtml(song.title)}" av ${escapeHtml(song.artist)}</div>
-        <div class="text-sm text-pink-400 font-audiowide mb-2">${queueMsg}</div>
-        <div class="text-base text-cyan-200 italic mt-4 max-w-md mx-auto">"${randomMsg}"</div>
+        <div class="text-sm text-white font-audiowide mb-2">${queueMsg}</div>
+        <div class="text-base text-gray-300 italic mt-4 max-w-md mx-auto">"${randomMsg}"</div>
       `;
     } else {
       const msg = data.message || '';
@@ -323,8 +323,8 @@ async function submitRequest(requestId, song) {
       } else {
         const errorText = escapeHtml(msg) || RETRY_FAILED[Math.floor(Math.random() * RETRY_FAILED.length)];
         requestFeedbackText.innerHTML = `
-          <div class="text-2xl font-audiowide text-pink-400 mb-2">${pick(ERROR_HEADERS)}</div>
-          <div class="text-sm text-cyan-200 font-sans mb-4">${errorText}</div>
+          <div class="text-2xl font-audiowide text-white mb-2">${pick(ERROR_HEADERS)}</div>
+          <div class="text-sm text-gray-300 font-sans mb-4">${errorText}</div>
         `;
       }
     }

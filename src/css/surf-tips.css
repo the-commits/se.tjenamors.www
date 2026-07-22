@@ -21,9 +21,9 @@
 
 #surf-tip-link {
   display: inline-block;
-  background: rgba(10, 6, 30, 0.88);
-  border: 2px solid #ff2e97;
-  color: #ffe6fb;
+  background: rgba(0, 0, 0, 0.88);
+  border: 2px solid white;
+  color: white;
   font-family: 'Audiowide', sans-serif;
   font-size: 0.9em;
   padding: 0.5em 1.3em;
@@ -36,13 +36,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: auto;
-  box-shadow: 0 0 18px rgba(255, 46, 151, 0.5), 0 0 35px rgba(54, 226, 248, 0.2);
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.5), 0 0 35px rgba(255, 255, 255, 0.2);
   transition: box-shadow 0.2s ease, background 0.2s ease;
 }
 
 #surf-tip-link:hover {
-  background: rgba(255, 46, 151, 0.28);
-  box-shadow: 0 0 28px rgba(255, 46, 151, 0.8), 0 0 50px rgba(54, 226, 248, 0.35);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 28px rgba(255, 255, 255, 0.8), 0 0 50px rgba(255, 255, 255, 0.35);
 }
 
 #surf-tip.flying-in #surf-tip-link {

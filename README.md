@@ -1,6 +1,6 @@
 # tjenamors.se
 
-Synthwave-radiostation. Den funkar. Oftast.
+Svartvit radiostation. Den funkar. Oftast.
 
 ## Kom igång
 
@@ -25,8 +25,11 @@ node tests/player-spacing.mjs
 
 # Hela skiten (pre-push)
 npm run lint && npm run lint:lines && node scripts/build.mjs \
-  && node tests/mobile-centering.mjs && node tests/sun-fade.mjs \
-  && node tests/abr-speeds.mjs
+  && node tests/mobile-centering.mjs && node tests/font-size-scaling.mjs \
+  && node tests/high-res-sizing.mjs && node tests/sun-fade.mjs \
+  && node tests/surf-tips.mjs && node tests/css-clean.mjs \
+  && node tests/song-transitions.mjs && node tests/wall-clock-sync.mjs \
+  && node tests/song-request.mjs
 
 # Testa mot prod (varför inte)
 TEST_URL=https://tjenamors.se node tests/player-spacing.mjs

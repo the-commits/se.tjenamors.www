@@ -23,28 +23,28 @@
   -webkit-mask-image: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0),
-    oklch(var(--p)) 66%,
-    oklch(var(--p))
+    #000 66%,
+    #000
   );
   mask-image: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0),
-    oklch(var(--p)) 66%,
-    oklch(var(--p))
+    #000 66%,
+    #000
   );
   background:
     linear-gradient(
       180deg,
       rgba(0, 0, 0, 0) 0px,
-      rgba(54, 226, 248, 0.5) 0%,
-      rgba(54, 226, 248, 0.5) 3px,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.5) 3px,
       rgba(0, 0, 0, 0) 0px
     ),
     linear-gradient(
       90deg,
       rgba(0, 0, 0, 0) 0px,
-      rgba(54, 226, 248, 0.5) 0%,
-      rgba(54, 226, 248, 0.5) 3px,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.5) 3px,
       rgba(0, 0, 0, 0) 0px
     );
   background-size:
@@ -70,6 +70,6 @@
   left: 0;
   right: 0;
   height: 100%;
-  background: linear-gradient(rgba(0, 0, 0, 0), oklch(var(--p)));
+  background: linear-gradient(rgba(0, 0, 0, 0), #000);
   pointer-events: none;
 }

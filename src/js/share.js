@@ -72,8 +72,9 @@ let feedbackTimeout = null;
 function showCopiedFeedback() {
   if (!shareBtn) return;
   const originalClass = shareBtn.className;
-  shareBtn.className = 'fa-solid fa-check';
-  shareBtn.style.color = '#36e2f8';
+  shareBtn.classList.remove('fa-share-from-square');
+  shareBtn.classList.add('fa-check');
+  shareBtn.style.color = 'white';
   shareBtn.title = 'Länk kopierad!';
 
   if (feedbackTimeout) clearTimeout(feedbackTimeout);

@@ -1,9 +1,13 @@
 <!doctype html>
-<html lang="sv" data-theme="synthwave">
+<html lang="sv">
   <head>
     <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://www.gstatic.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net; font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net; img-src 'self' data: blob: https://radio.tjenamors.se; media-src 'self' blob: https://radio.tjenamors.se; connect-src 'self' https://tjenamors.se wss://tjenamors.se https://radio.tjenamors.se https://api.tjenamors.se;">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>TjenaMors.se</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="build/assets/base.css" />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="build/assets/fontawesome/css/all.min.css" />
@@ -59,7 +63,7 @@
     }
     </script>
   </head>
-  <body class="font-sans antialiased overflow-hidden">
+  <body class="font-sans antialiased overflow-hidden bg-black text-white">
     <div class="relative h-screen overflow-hidden" style="font-size: min(max(16px, calc(0.4vw + 0.4vh)), 2.8vmin, 1.8vh, 32px);">
       <div class="relative mx-auto w-full h-full city overflow-hidden">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 sun"></div>
@@ -79,8 +83,8 @@
           </div>
           <div class="controls">
             <div class="controls-left">
-              <button id="play-pause" class="btn" disabled><i class="fa-solid fa-play"></i></button>
-              <button id="live-btn" class="btn live">LIVE</button>
+              <button id="play-pause" class="btn bg-black text-white border-2 border-white hover:bg-white hover:text-black transition-colors rounded-full px-6 py-2" disabled><i class="fa-solid fa-play"></i></button>
+              <button id="live-btn" class="btn live bg-black text-white border-2 border-white hover:bg-white hover:text-black transition-colors rounded-full px-4 py-2">LIVE</button>
             </div>
             <i class="fa-solid fa-share-from-square" id="share-btn" role="button" tabindex="0" title="Dela"></i>
           </div>
@@ -91,7 +95,7 @@
               <div id="time" class="tracking-widest"></div>
             </div>
           <div class="request-wrap mt-4 mx-auto">
-            <button id="request-btn" class="btn w-full" disabled>Önska låt</button>
+            <button id="request-btn" class="btn w-full bg-black text-white border-2 border-white hover:bg-white hover:text-black transition-colors rounded-full px-6 py-2" disabled>Önska låt</button>
           </div>
         </div>
       </div>
@@ -115,20 +119,20 @@
         <div class="request-modal-bg absolute inset-0"></div>
         <div class="request-modal-content relative w-full max-w-2xl flex flex-col mt-8">
           <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-audiowide text-pink-400 text-shadow-neon">Önska låt</h2>
-            <button id="request-close" class="text-2xl text-cyan-400 hover:text-pink-400 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="text-2xl font-audiowide text-white text-shadow-neon">Önska låt</h2>
+            <button id="request-close" class="text-2xl text-gray-300 hover:text-white transition-colors"><i class="fa-solid fa-xmark"></i></button>
           </div>
-          <input type="text" id="request-search" placeholder="Sök låt eller artist..." class="w-full p-3 mb-4 bg-dark-glass border-2 border-cyan-400 rounded text-white font-sans focus:border-pink-400 focus:outline-none transition-colors" />
+          <input type="text" id="request-search" placeholder="Sök låt eller artist..." class="w-full p-3 mb-4 bg-dark-glass border-2 border-gray-400 rounded text-white font-sans focus:border-white focus:outline-none transition-colors" />
           <div id="request-list" class="flex-1 overflow-y-auto flex flex-col gap-2 pr-2">
             <!-- Request items will be injected here -->
           </div>
-          <div class="flex justify-between items-center mt-4 pt-4 border-t border-cyan-400/30">
-            <button id="request-prev" class="btn" disabled><i class="fa-solid fa-chevron-left"></i></button>
-            <span id="request-page-info" class="font-audiowide text-sm text-cyan-200">Sida 1</span>
-            <button id="request-next" class="btn" disabled><i class="fa-solid fa-chevron-right"></i></button>
+          <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-600">
+            <button id="request-prev" class="btn bg-black text-white border border-gray-400 hover:bg-white hover:text-black transition-colors rounded px-4 py-2" disabled><i class="fa-solid fa-chevron-left"></i></button>
+            <span id="request-page-info" class="font-audiowide text-sm text-gray-300">Sida 1</span>
+            <button id="request-next" class="btn bg-black text-white border border-gray-400 hover:bg-white hover:text-black transition-colors rounded px-4 py-2" disabled><i class="fa-solid fa-chevron-right"></i></button>
           </div>
-          <div id="request-feedback" class="absolute inset-0 flex items-center justify-center bg-dark-glass backdrop-blur-md hidden flex-col gap-4 text-center p-6 rounded-lg border-2 border-pink-400">
-            <div class="text-xl font-audiowide text-cyan-400" id="request-feedback-text">Skickar önskan...</div>
+          <div id="request-feedback" class="absolute inset-0 flex items-center justify-center bg-dark-glass backdrop-blur-md hidden flex-col gap-4 text-center p-6 rounded-lg border-2 border-white">
+            <div class="text-xl font-audiowide text-white" id="request-feedback-text">Skickar önskan...</div>
           </div>
         </div>
       </div>
