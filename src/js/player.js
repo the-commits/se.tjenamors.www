@@ -81,6 +81,12 @@ export function alignPlayerToSun() {
 }
 
 export function revealPlayer() {
+  // Wait for the full stylesheet chain (@import waterfall) before
+  // reading layout — otherwise we force layout on unloaded styles
+  if (document.readyState !== 'complete') {
+    window.addEventListener('load', revealPlayer, { once: true });
+    return;
+  }
   alignPlayerToSun();
   playerEl.classList.add('visible');
 }
