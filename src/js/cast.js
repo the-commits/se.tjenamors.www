@@ -1,4 +1,6 @@
 // Chromecast integration — Cast SDK for streaming to TV/speakers.
+// Privacy: the Google Cast SDK is lazy-loaded on first button click —
+// no requests to Google servers happen until the user opts in to casting.
 // Feature flag: set window.__CAST_ENABLED = false to disable.
 // Debug: set window.__DEBUG = true for Cast logging.
 
@@ -33,7 +35,8 @@ function createCastButton() {
   castBtn.setAttribute('role', 'button');
   castBtn.setAttribute('tabindex', '0');
   castBtn.title = 'Spela på Chromecast';
-  castBtn.style.display = 'none'; // hidden until SDK available
+  // Cast SDK only works in Chromium-based browsers — hide button elsewhere
+  if (!window.chrome) castBtn.style.display = 'none';
 
   // Insert into .controls, after share button
   const controls = document.querySelector('.controls');
@@ -53,15 +56,18 @@ function createCastButton() {
   });
 }
 
-function onCastButtonClick() {
-  if (!castContext) return;
-  if (castContext.getCurrentSession()) {
+async function onCastButtonClick() {
+  if (castContext && castContext.getCurrentSession()) {
     castContext.endCurrentSession(true);
-  } else {
-    castContext.requestSession().catch(() => {
-      // User cancelled or no devices available — silently ignore
-    });
+    return;
   }
+  // First click loads the Google Cast SDK — this is the only time
+  // the page ever contacts gstatic.com.
+  const available = await loadCastSDK();
+  if (!available || !castContext) return;
+  castContext.requestSession().catch(() => {
+    // User cancelled or no devices available — silently ignore
+  });
 }
 
 function updateCastButton() {
@@ -94,9 +100,6 @@ function initializeCastApi() {
       onSessionStateChanged
     );
 
-    // Show Cast button now that SDK is ready
-    if (castBtn) castBtn.style.display = '';
-
     // If already in a session (page reload while casting), sync state
     if (castContext.getCurrentSession()) {
       isCasting = true;
@@ -111,17 +114,25 @@ function initializeCastApi() {
   }
 }
 
-function onGCastApiAvailable(available) {
-  if (window.__DEBUG) console.log('[CAST] SDK available:', available);
-  if (available) initializeCastApi();
-}
+let sdkPromise = null;
 
+// Inject the Cast SDK script tag and resolve once it reports availability.
+// Singleton — repeated clicks while loading reuse the same promise.
 function loadCastSDK() {
-  window.__onGCastApiAvailable = onGCastApiAvailable;
-  const s = document.createElement('script');
-  s.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
-  s.async = true;
-  document.head.appendChild(s);
+  if (sdkPromise) return sdkPromise;
+  sdkPromise = new Promise((resolve) => {
+    window.__onGCastApiAvailable = (available) => {
+      if (window.__DEBUG) console.log('[CAST] SDK available:', available);
+      if (available) initializeCastApi();
+      resolve(available);
+    };
+    const s = document.createElement('script');
+    s.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
+    s.async = true;
+    s.onerror = () => resolve(false);
+    document.head.appendChild(s);
+  });
+  return sdkPromise;
 }
 
 // --- Session handling ---
@@ -232,7 +243,6 @@ export function initCast() {
   }
 
   createCastButton();
-  loadCastSDK();
 
   // Sync volume slider to Chromecast when casting
   volumeSlider.addEventListener('input', onVolumeInput);
