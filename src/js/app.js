@@ -76,7 +76,7 @@ initWelcome();
   if (!notice) return;
 
   function lowerSurfTip() {
-    if (tip) tip.style.bottom = '0.8em';
+    if (tip) tip.style.bottom = '1.8em';
   }
 
   if (localStorage.getItem('tj_cookie_notice_dismissed')) {

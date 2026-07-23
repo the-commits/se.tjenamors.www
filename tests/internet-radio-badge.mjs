@@ -54,13 +54,8 @@ try {
   check('Container gap is 3px', containerInfo?.gap === '3px');
   check('Container left is 3px', containerInfo?.left === '3px');
   check('Container bottom is 3px', containerInfo?.bottom === '3px');
-  check(
-    'Container z-index is higher than cookie notice',
-    (containerInfo?.zIndex ?? 0) > (containerInfo?.cookieZIndex ?? 0),
-    `container: ${containerInfo?.zIndex}, cookie: ${containerInfo?.cookieZIndex}`
-  );
 
-  // Test element attributes
+  // Test element attributes & local image
   console.log('\n--- Checking Internet Radio Badge Attributes ---');
   const badgeInfo = await page.evaluate(() => {
     const el = document.querySelector('#internet-radio-badge');
@@ -71,6 +66,7 @@ try {
       target: el.getAttribute('target'),
       rel: el.getAttribute('rel'),
       imgSrc: img ? img.getAttribute('src') : null,
+      imgNaturalWidth: img ? img.naturalWidth : 0,
     };
   });
 
@@ -80,14 +76,38 @@ try {
     badgeInfo?.href === 'https://www.internet-radio.com',
     badgeInfo?.href
   );
-  const expectedBadgeUrl = 'https://www.internet-radio.com/images/internet-radio-badge.gif';
   check(
-    'Badge image src is valid',
-    badgeInfo?.imgSrc === expectedBadgeUrl,
+    'Badge image uses local src images/internet-radio-badge.gif',
+    badgeInfo?.imgSrc === 'images/internet-radio-badge.gif',
     badgeInfo?.imgSrc
   );
   check('Badge opens in new tab (_blank)', badgeInfo?.target === '_blank');
   check('Badge rel includes noopener', badgeInfo?.rel?.includes('noopener'));
+
+  // Test vertical stacking order: surf-tips > cookie-notice > links
+  console.log('\n--- Checking Vertical Stacking Order ---');
+  const stackPositions = await page.evaluate(() => {
+    const links = document.querySelector('#bottom-left-links')?.getBoundingClientRect();
+    const cookie = document.querySelector('#cookie-notice')?.getBoundingClientRect();
+    const tip = document.querySelector('#surf-tip')?.getBoundingClientRect();
+
+    return {
+      linksBottom: links ? window.innerHeight - links.bottom : null,
+      cookieBottom: cookie ? window.innerHeight - cookie.bottom : null,
+      tipBottom: tip ? window.innerHeight - tip.bottom : null,
+    };
+  });
+
+  check(
+    'Cookie notice is stacked above links',
+    stackPositions.cookieBottom > stackPositions.linksBottom,
+    `cookie: ${stackPositions.cookieBottom}px, links: ${stackPositions.linksBottom}px`
+  );
+  check(
+    'Surf tip is stacked above cookie notice',
+    stackPositions.tipBottom > stackPositions.cookieBottom,
+    `tip: ${stackPositions.tipBottom}px, cookie: ${stackPositions.cookieBottom}px`
+  );
 
   // Test multi-link flexbox layout spacing
   console.log('\n--- Checking Multi-Link Flexbox Layout Spacing ---');
