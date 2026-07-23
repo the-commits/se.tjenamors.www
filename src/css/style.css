@@ -6,7 +6,6 @@
 @import url("./request.css");
 @import url("./toast.css");
 
-/* Cookie notice — bottom of screen, dismissable, synthwave-styled */
 #cookie-notice {
   position: fixed;
   bottom: 1em;
@@ -67,7 +66,6 @@
   border-color: #ff3b3b;
 }
 
-/* Bottom-left links flexbox container — 3px edge margin, 3px gap between links */
 #bottom-left-links {
   position: fixed;
   bottom: 3px;
