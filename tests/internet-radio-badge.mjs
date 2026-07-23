@@ -76,8 +76,8 @@ try {
 
   check('Badge element exists', badgeInfo !== null);
   check(
-    'Badge links to http://www.internet-radio.com',
-    badgeInfo?.href === 'http://www.internet-radio.com',
+    'Badge links to https://www.internet-radio.com',
+    badgeInfo?.href === 'https://www.internet-radio.com',
     badgeInfo?.href
   );
   const expectedBadgeUrl = 'https://www.internet-radio.com/images/internet-radio-badge.gif';
