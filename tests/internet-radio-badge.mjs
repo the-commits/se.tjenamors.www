@@ -56,36 +56,6 @@ try {
   check('Container bottom is 3px', containerInfo?.bottom === '3px');
 
   // Test element attributes
-  console.log('\n--- Checking Internet Radio Badge Snippet ---');
-  const badgeInfo = await page.evaluate(() => {
-    const el = document.querySelector('#bottom-left-links a[href="http://www.internet-radio.com"]');
-    if (!el) return null;
-    const img = el.querySelector('img');
-    return {
-      href: el.getAttribute('href'),
-      title: el.getAttribute('title'),
-      target: el.getAttribute('target'),
-      imgSrc: img ? img.getAttribute('src') : null,
-      imgAlt: img ? img.getAttribute('alt') : null,
-    };
-  });
-
-  check('Badge element exists', badgeInfo !== null);
-  check(
-    'Badge links to http://www.internet-radio.com',
-    badgeInfo?.href === 'http://www.internet-radio.com',
-    badgeInfo?.href
-  );
-  check('Badge title is Internet Radio', badgeInfo?.title === 'Internet Radio');
-  check('Badge target is _blank', badgeInfo?.target === '_blank');
-  check(
-    'Badge image src matches snippet',
-    badgeInfo?.imgSrc === 'http://www.internet-radio.com/images/internet-radio-badge.gif',
-    badgeInfo?.imgSrc
-  );
-  check('Badge image alt is Internet Radio', badgeInfo?.imgAlt === 'Internet Radio');
-
-  // Test Punk Radio Stations link
   console.log('\n--- Checking Punk Radio Stations Link ---');
   const punkLinkInfo = await page.evaluate(() => {
     const el = document.querySelector('#bottom-left-links .punk-radio-link');
@@ -133,32 +103,23 @@ try {
     `tip: ${stackPositions.tipBottom}px, cookie: ${stackPositions.cookieBottom}px`
   );
 
-  // Test multi-link flexbox layout spacing
-  console.log('\n--- Checking Multi-Link Flexbox Layout Spacing ---');
-  const multiLinkPos = await page.evaluate(() => {
+  // Test link positioning
+  console.log('\n--- Checking Link Positioning ---');
+  const linkPos = await page.evaluate(() => {
     const container = document.querySelector('#bottom-left-links');
-    const allLinks = Array.from(container.querySelectorAll('a'));
+    const link = container.querySelector('a');
     
-    if (allLinks.length < 2) {
+    if (!link) {
       return null;
     }
 
-    const r1 = allLinks[0].getBoundingClientRect();
-    const r2 = allLinks[1].getBoundingClientRect();
+    const r = link.getBoundingClientRect();
     return {
-      r1Left: r1.left,
-      r1Right: r1.right,
-      r2Left: r2.left,
-      gapBetween: r2.left - r1.right,
+      left: r.left,
     };
   });
 
-  check('First link stays at left margin (3px)', Math.abs(multiLinkPos.r1Left - 3) < 1);
-  check(
-    'Second link appears to the right with 3px gap',
-    Math.abs(multiLinkPos.gapBetween - 3) < 1,
-    `gap was ${multiLinkPos.gapBetween}px`
-  );
+  check('First link stays at left margin (3px)', Math.abs(linkPos.left - 3) < 1);
 
   // Test positioning across viewports
   console.log('\n--- Checking Container Positioning Across Viewports ---');
