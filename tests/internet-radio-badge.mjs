@@ -30,7 +30,38 @@ try {
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
 
+  // Test container flexbox properties
+  console.log('\n--- Checking Flexbox Container (#bottom-left-links) ---');
+  const containerInfo = await page.evaluate(() => {
+    const container = document.querySelector('#bottom-left-links');
+    if (!container) return null;
+    const style = window.getComputedStyle(container);
+    const cookieStyle = window.getComputedStyle(document.querySelector('#cookie-notice'));
+    return {
+      display: style.display,
+      position: style.position,
+      gap: style.gap,
+      left: style.left,
+      bottom: style.bottom,
+      zIndex: parseInt(style.zIndex, 10),
+      cookieZIndex: parseInt(cookieStyle.zIndex, 10),
+    };
+  });
+
+  check('Container #bottom-left-links exists', containerInfo !== null);
+  check('Container is display: flex', containerInfo?.display === 'flex');
+  check('Container is position: fixed', containerInfo?.position === 'fixed');
+  check('Container gap is 3px', containerInfo?.gap === '3px');
+  check('Container left is 3px', containerInfo?.left === '3px');
+  check('Container bottom is 3px', containerInfo?.bottom === '3px');
+  check(
+    'Container z-index is higher than cookie notice',
+    (containerInfo?.zIndex ?? 0) > (containerInfo?.cookieZIndex ?? 0),
+    `container: ${containerInfo?.zIndex}, cookie: ${containerInfo?.cookieZIndex}`
+  );
+
   // Test element attributes
+  console.log('\n--- Checking Internet Radio Badge Attributes ---');
   const badgeInfo = await page.evaluate(() => {
     const el = document.querySelector('#internet-radio-badge');
     if (!el) return null;
@@ -40,11 +71,9 @@ try {
       target: el.getAttribute('target'),
       rel: el.getAttribute('rel'),
       imgSrc: img ? img.getAttribute('src') : null,
-      imgAlt: img ? img.getAttribute('alt') : null,
     };
   });
 
-  console.log('\n--- Checking Internet Radio Badge Attributes ---');
   check('Badge element exists', badgeInfo !== null);
   check(
     'Badge links to http://www.internet-radio.com',
@@ -60,27 +89,49 @@ try {
   check('Badge opens in new tab (_blank)', badgeInfo?.target === '_blank');
   check('Badge rel includes noopener', badgeInfo?.rel?.includes('noopener'));
 
+  // Test multi-link flexbox layout spacing
+  console.log('\n--- Checking Multi-Link Flexbox Layout Spacing ---');
+  const multiLinkPos = await page.evaluate(() => {
+    const container = document.querySelector('#bottom-left-links');
+    const link2 = document.createElement('a');
+    link2.id = 'test-second-link';
+    link2.href = 'https://example.com';
+    link2.innerHTML = '<span style="display:inline-block;width:50px;height:15px;"></span>';
+    container.appendChild(link2);
+
+    const r1 = document.querySelector('#internet-radio-badge').getBoundingClientRect();
+    const r2 = link2.getBoundingClientRect();
+    return {
+      r1Left: r1.left,
+      r1Right: r1.right,
+      r2Left: r2.left,
+      gapBetween: r2.left - r1.right,
+    };
+  });
+
+  check('First link stays at left margin (3px)', Math.abs(multiLinkPos.r1Left - 3) < 1);
+  check(
+    'Second link appears to the right with 3px gap',
+    Math.abs(multiLinkPos.gapBetween - 3) < 1,
+    `gap was ${multiLinkPos.gapBetween}px`
+  );
+
   // Test positioning across viewports
-  console.log('\n--- Checking Badge Positioning Across Viewports ---');
+  console.log('\n--- Checking Container Positioning Across Viewports ---');
   for (const vp of VIEWPORTS) {
     await page.setViewport({ width: vp.w, height: vp.h });
     await new Promise((r) => setTimeout(r, 200));
 
     const pos = await page.evaluate(() => {
-      const el = document.querySelector('#internet-radio-badge');
+      const el = document.querySelector('#bottom-left-links');
       if (!el) return null;
       const r = el.getBoundingClientRect();
-      const style = window.getComputedStyle(el);
       return {
         left: r.left,
         bottomOffset: window.innerHeight - r.bottom,
-        position: style.position,
-        leftCss: style.left,
-        bottomCss: style.bottom,
       };
     });
 
-    check(`${vp.name}: Position is fixed`, pos?.position === 'fixed', pos?.position);
     check(`${vp.name}: Left is 3px`, Math.abs((pos?.left ?? -1) - 3) < 1, `got ${pos?.left}px`);
     check(
       `${vp.name}: Bottom offset is 3px`,

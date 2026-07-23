@@ -67,23 +67,32 @@
   border-color: #ff3b3b;
 }
 
-/* Internet Radio badge — fixed in bottom left corner with 3px edge margin */
-#internet-radio-badge {
+/* Bottom-left links flexbox container — 3px edge margin, 3px gap between links */
+#bottom-left-links {
   position: fixed;
   bottom: 3px;
   left: 3px;
-  z-index: 30;
-  display: block;
+  z-index: 250;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 3px;
+  pointer-events: auto;
+}
+
+#bottom-left-links a {
+  display: inline-flex;
+  align-items: center;
   line-height: 0;
   opacity: 0.8;
   transition: opacity 0.2s ease;
 }
 
-#internet-radio-badge:hover {
+#bottom-left-links a:hover {
   opacity: 1;
 }
 
-#internet-radio-badge img {
+#bottom-left-links img {
   display: block;
   border: 0;
   width: auto;
@@ -91,11 +100,19 @@
   max-width: 100%;
 }
 
+@media (max-width: 600px) {
+  #cookie-notice {
+    bottom: 2em;
+    max-width: calc(100vw - 6em);
+  }
+}
+
 @media (max-width: 400px) {
   #cookie-notice {
     font-size: 0.65em;
     padding: 0.4em 0.9em;
-    bottom: 0.6em;
+    bottom: 2.2em;
+    max-width: calc(100vw - 4em);
   }
   #cookie-dismiss {
     top: -0.3em;
