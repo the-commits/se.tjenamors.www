@@ -27,6 +27,13 @@ function isEnabled() {
 // --- Update metadata ---
 
 function applyMetadata(song, cacheBuster = song.id) {
+  // Firefox bug 1903946: Firefox does not re-push artwork to MPRIS on
+  // in-place metadata updates, so consumers show stale cover art forever.
+  // Workaround: clear metadata first so every apply is a full
+  // teardown/re-announce cycle — like a real track change.
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=1903946
+  navigator.mediaSession.metadata = null;
+
   const title = song.title || 'TjenaMors Radio';
   const artist = song.artist || 'Vi spelar bra skit!';
 
@@ -94,12 +101,25 @@ function scheduleMetadataRefresh(songId) {
   }, 10000);
 }
 
+// Make the page URL song-dependent. MPRIS consumers may key artwork caches
+// on xesam:url (derived from the page URL) — and tjenamors.se never changes
+// on its own since it's a single-page player polling the API. Hash-only
+// change: no reload, no history entries, share links unaffected.
+function bustPageUrl(song) {
+  try {
+    history.replaceState(null, '', '#' + song.id);
+  } catch (e) {
+    if (window.__DEBUG) console.warn('[MEDIA] page URL bust failed', e);
+  }
+}
+
 function updateMetadata() {
   if (!('mediaSession' in navigator)) return;
   if (!nowPlayingSong) return;
   if (nowPlayingSong.id === lastSongId) return;
   lastSongId = nowPlayingSong.id;
 
+  bustPageUrl(nowPlayingSong);
   applyMetadata(nowPlayingSong);
   reapplyWhenArtLoads(nowPlayingSong);
 
