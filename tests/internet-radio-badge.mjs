@@ -55,34 +55,58 @@ try {
   check('Container left is 3px', containerInfo?.left === '3px');
   check('Container bottom is 3px', containerInfo?.bottom === '3px');
 
-  // Test element attributes & local image
-  console.log('\n--- Checking Internet Radio Badge Attributes ---');
+  // Test element attributes
+  console.log('\n--- Checking Internet Radio Badge Snippet ---');
   const badgeInfo = await page.evaluate(() => {
-    const el = document.querySelector('#internet-radio-badge');
+    const el = document.querySelector('#bottom-left-links a[href="http://www.internet-radio.com"]');
     if (!el) return null;
     const img = el.querySelector('img');
     return {
       href: el.getAttribute('href'),
+      title: el.getAttribute('title'),
       target: el.getAttribute('target'),
-      rel: el.getAttribute('rel'),
       imgSrc: img ? img.getAttribute('src') : null,
-      imgNaturalWidth: img ? img.naturalWidth : 0,
+      imgAlt: img ? img.getAttribute('alt') : null,
     };
   });
 
   check('Badge element exists', badgeInfo !== null);
   check(
-    'Badge links to https://www.internet-radio.com',
-    badgeInfo?.href === 'https://www.internet-radio.com',
+    'Badge links to http://www.internet-radio.com',
+    badgeInfo?.href === 'http://www.internet-radio.com',
     badgeInfo?.href
   );
+  check('Badge title is Internet Radio', badgeInfo?.title === 'Internet Radio');
+  check('Badge target is _blank', badgeInfo?.target === '_blank');
   check(
-    'Badge image uses local src images/internet-radio-badge.gif',
-    badgeInfo?.imgSrc === 'images/internet-radio-badge.gif',
+    'Badge image src matches snippet',
+    badgeInfo?.imgSrc === 'http://www.internet-radio.com/images/internet-radio-badge.gif',
     badgeInfo?.imgSrc
   );
-  check('Badge opens in new tab (_blank)', badgeInfo?.target === '_blank');
-  check('Badge rel includes noopener', badgeInfo?.rel?.includes('noopener'));
+  check('Badge image alt is Internet Radio', badgeInfo?.imgAlt === 'Internet Radio');
+
+  // Test Punk Radio Stations link
+  console.log('\n--- Checking Punk Radio Stations Link ---');
+  const punkLinkInfo = await page.evaluate(() => {
+    const el = document.querySelector('#bottom-left-links .punk-radio-link');
+    if (!el) return null;
+    return {
+      href: el.getAttribute('href'),
+      target: el.getAttribute('target'),
+      rel: el.getAttribute('rel'),
+      text: el.textContent.trim(),
+    };
+  });
+
+  check('Punk Radio link exists', punkLinkInfo !== null);
+  check(
+    'Punk Radio links to correct URL',
+    punkLinkInfo?.href === 'http://www.internet-radio.com/stations/punk/',
+    punkLinkInfo?.href
+  );
+  check('Punk Radio target is _blank', punkLinkInfo?.target === '_blank');
+  check('Punk Radio rel includes noopener', punkLinkInfo?.rel?.includes('noopener'));
+  check('Punk Radio text is correct', punkLinkInfo?.text === 'Punk Radio Stations');
 
   // Test vertical stacking order: surf-tips > cookie-notice > links
   console.log('\n--- Checking Vertical Stacking Order ---');
@@ -113,14 +137,14 @@ try {
   console.log('\n--- Checking Multi-Link Flexbox Layout Spacing ---');
   const multiLinkPos = await page.evaluate(() => {
     const container = document.querySelector('#bottom-left-links');
-    const link2 = document.createElement('a');
-    link2.id = 'test-second-link';
-    link2.href = 'https://example.com';
-    link2.innerHTML = '<span style="display:inline-block;width:50px;height:15px;"></span>';
-    container.appendChild(link2);
+    const allLinks = Array.from(container.querySelectorAll('a'));
+    
+    if (allLinks.length < 2) {
+      return null;
+    }
 
-    const r1 = document.querySelector('#internet-radio-badge').getBoundingClientRect();
-    const r2 = link2.getBoundingClientRect();
+    const r1 = allLinks[0].getBoundingClientRect();
+    const r2 = allLinks[1].getBoundingClientRect();
     return {
       r1Left: r1.left,
       r1Right: r1.right,

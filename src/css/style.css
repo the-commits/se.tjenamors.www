@@ -86,6 +86,26 @@
   transition: opacity 0.2s ease;
 }
 
+.punk-radio-link {
+  font-family: 'Audiowide', sans-serif;
+  font-size: 0.6em;
+  color: #ffe6fb;
+  text-decoration: none;
+  text-shadow: 0 0 6px rgba(255, 46, 151, 0.5);
+  padding: 0.4em 0.8em;
+  border: 1px solid rgba(255, 46, 151, 0.3);
+  border-radius: 4px;
+  background: rgba(10, 6, 30, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.punk-radio-link:hover {
+  color: #36e2f8;
+  border-color: rgba(54, 226, 248, 0.6);
+  text-shadow: 0 0 8px rgba(54, 226, 248, 0.7);
+  opacity: 1;
+}
+
 #bottom-left-links a:hover {
   opacity: 1;
 }
