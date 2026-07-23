@@ -67,6 +67,30 @@
   border-color: #ff3b3b;
 }
 
+/* Internet Radio badge — fixed in bottom left corner with 3px edge margin */
+#internet-radio-badge {
+  position: fixed;
+  bottom: 3px;
+  left: 3px;
+  z-index: 30;
+  display: block;
+  line-height: 0;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+#internet-radio-badge:hover {
+  opacity: 1;
+}
+
+#internet-radio-badge img {
+  display: block;
+  border: 0;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+}
+
 @media (max-width: 400px) {
   #cookie-notice {
     font-size: 0.65em;
