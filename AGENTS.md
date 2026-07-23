@@ -27,3 +27,8 @@ This project utilizes semantic versioning (semver). When bumping the version, yo
 ### 5. Edge Proxies & Injected Scripts
 - Edge proxies (e.g., Cloudflare Web Analytics) may inject inline scripts and beacons. Pinned sha256 CSP hashes break when edge providers rotate loader snippets. Handle edge injections via host rules or disable them in the proxy dashboard.
 
+### 6. Known Bug: Firefox MPRIS Artwork Never Updates (Upstream)
+- **Upstream bug:** [Firefox bug 1903946](https://bugzilla.mozilla.org/show_bug.cgi?id=1903946) — Firefox does not re-push artwork to MPRIS on in-place `mediaSession.metadata` updates. Linux media widgets (DankMaterialShell, KDE Connect, Plasma) show stale cover art indefinitely while title/artist update correctly.
+- **Workarounds shipped (v1.4.2/v1.4.3, `src/js/media-session.js`):** periodic metadata re-send every 15s, `?tm=` cache-buster on artwork URLs (per-song on apply, per-timestamp on re-send), re-apply on artwork preload, `metadata = null` teardown before every apply, and per-song page-URL bust via `history.replaceState('#<songid>')` (consumers may key art caches on `xesam:url`, which is constant for a single-page player).
+- **Not fully fixable from JS** if Firefox caches artwork deeper in its MPRIS bridge — the real fix must land in Firefox. Diagnose with `dbus-monitor "interface='org.freedesktop.DBus.Properties',member='PropertiesChanged'"`: if `mpris:artUrl` changes on the bus but the widget still shows old art, the bug is in the widget, not Firefox.
+
