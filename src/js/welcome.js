@@ -1,7 +1,7 @@
 // Welcoming log for browser users
 export function initWelcome() {
     console.log(
-        '%cTjenamors v1.4.1! %c🇸🇪',
+        '%cTjenamors v1.4.2! %c🇸🇪',
         [
             'background: linear-gradient(135deg, #8A2BE2, #4B0082)',
             'color: white',

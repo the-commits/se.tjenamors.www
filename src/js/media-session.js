@@ -10,6 +10,12 @@ import { audio } from './dom.js';
 let lastSongId = null;
 let checkInterval = null;
 let metadataRefreshTimer = null;
+let resendInterval = null;
+
+// Re-send cadence: platforms (Bluetooth AVRCP, OS media notifications) can
+// miss the artwork fetch on first assignment and show stale cover art.
+// Re-sending metadata every 15s lets lagging clients catch up.
+const METADATA_RESEND_MS = 15000;
 
 // --- Feature flag ---
 
@@ -20,14 +26,16 @@ function isEnabled() {
 
 // --- Update metadata ---
 
-function applyMetadata(song) {
+function applyMetadata(song, cacheBuster = song.id) {
   const title = song.title || 'TjenaMors Radio';
   const artist = song.artist || 'Vi spelar bra skit!';
 
-  const artwork = song.art
+  const artSrc = artworkSrc(song, cacheBuster);
+
+  const artwork = artSrc
     ? [
-        { src: song.art, sizes: '256x256' },
-        { src: song.art, sizes: '512x512' },
+        { src: artSrc, sizes: '256x256' },
+        { src: artSrc, sizes: '512x512' },
       ]
     : [
         { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
@@ -42,6 +50,38 @@ function applyMetadata(song) {
   });
 
   if (window.__DEBUG) console.log('[MEDIA] metadata:', title, '—', artist);
+}
+
+// Cache-buster on the artwork URL: some consumers (KDE Connect, MPRIS
+// bridges) cache or dedupe artwork by URL — a fresh query forces them to
+// re-fetch instead of reusing a stale cached cover.
+function artworkSrc(song, cacheBuster = song.id) {
+  if (!song.art) return null;
+  return `${song.art}${song.art.includes('?') ? '&' : '?'}tm=${cacheBuster}`;
+}
+
+// Re-apply metadata as soon as the artwork has finished loading into the
+// browser cache — a following re-send (or the OS's own re-fetch) then has a
+// warm cache to read from instead of racing the network.
+function reapplyWhenArtLoads(song) {
+  const src = artworkSrc(song);
+  if (!src) return;
+  const img = new Image();
+  img.onload = () => {
+    if (!nowPlayingSong) return;
+    if (nowPlayingSong.id !== song.id) return;
+    applyMetadata(nowPlayingSong);
+    if (window.__DEBUG) console.log('[MEDIA] art loaded, metadata re-applied');
+  };
+  img.src = src;
+}
+
+function resendMetadata() {
+  if (!nowPlayingSong) return;
+  // Fresh cache-buster on every re-send so URL-caching consumers can't
+  // serve a stale cover from a previous failed or outdated fetch
+  applyMetadata(nowPlayingSong, Date.now());
+  if (window.__DEBUG) console.log('[MEDIA] metadata re-sent (periodic)');
 }
 
 function scheduleMetadataRefresh(songId) {
@@ -61,6 +101,7 @@ function updateMetadata() {
   lastSongId = nowPlayingSong.id;
 
   applyMetadata(nowPlayingSong);
+  reapplyWhenArtLoads(nowPlayingSong);
 
   // Bluetooth AVRCP workaround: re-send metadata after delay
   // so car head units get a second chance to pick up the artwork URL
@@ -130,6 +171,10 @@ export function initMediaSession() {
 
   // Poll every 2s for song changes (same cadence as API poll)
   checkInterval = setInterval(updateMetadata, 2000);
+
+  // Re-send metadata every 15s so platforms that missed the artwork sync
+  // catch up later instead of showing stale cover art
+  resendInterval = setInterval(resendMetadata, METADATA_RESEND_MS);
 
   if (window.__DEBUG) console.log('[MEDIA] initialized');
 }
