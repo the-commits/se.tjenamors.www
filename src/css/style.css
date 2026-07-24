@@ -86,7 +86,7 @@
   transition: opacity 0.2s ease;
 }
 
-.punk-radio-link {
+.radio-link {
   font-family: 'Audiowide', sans-serif;
   font-size: 0.6em;
   color: #ffe6fb;
@@ -99,7 +99,7 @@
   backdrop-filter: blur(4px);
 }
 
-.punk-radio-link:hover {
+.radio-link:hover {
   color: #36e2f8;
   border-color: rgba(54, 226, 248, 0.6);
   text-shadow: 0 0 8px rgba(54, 226, 248, 0.7);

@@ -58,7 +58,7 @@ try {
   // Test element attributes
   console.log('\n--- Checking Punk Radio Stations Link ---');
   const punkLinkInfo = await page.evaluate(() => {
-    const el = document.querySelector('#bottom-left-links .punk-radio-link');
+    const el = document.querySelector('#bottom-left-links .radio-link');
     if (!el) return null;
     return {
       href: el.getAttribute('href'),
